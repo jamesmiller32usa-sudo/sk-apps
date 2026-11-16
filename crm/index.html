@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sharangakutir CRM</title>
+<link rel="preconnect" href="https://dkwlsfzysjdubcwuemvx.supabase.co" crossorigin>
 <script src="/assets/supabase.js"></script>
 <script src="/assets/auth.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1499,20 +1500,39 @@ function authInit() {
   if (authInit._started) return; authInit._started = true;
   SKAUTH.requireGate().then(function(ok) {
     if (!ok) return;
-    return SKAUTH.crmProfile().then(function(p) {
-      if (p) startSession(p); else showLogin();
+    return SKAUTH.crm.auth.getSession().then(function(r) {
+      var sess = r.data.session, cached = null;
+      try { cached = JSON.parse(localStorage.getItem('ourapps-crm-profile') || 'null'); } catch (e) {}
+      if (sess && cached && cached.user_id === sess.user.id) {
+        // Fast path: open instantly from the saved profile, confirm with the server in the background.
+        startSession(cached);
+        SKAUTH.crmProfile().then(function(p) {
+          if (!p) { localStorage.removeItem('ourapps-crm-profile'); SKAUTH.crmSignOut().then(function(){ location.reload(); }); return; }
+          rememberProfile(p);
+          if (p.crm_role !== cached.crm_role) location.reload();
+        }).catch(function(){});
+        return;
+      }
+      return SKAUTH.crmProfile().then(function(p) {
+        if (p) { rememberProfile(p); startSession(p); } else showLogin();
+      });
     });
   }).catch(function(e){ console.error('authInit error:', e); showLogin(); });
 }
 
+function rememberProfile(p) {
+  try { localStorage.setItem('ourapps-crm-profile', JSON.stringify({ user_id: p.user_id, username: p.username, crm_role: p.crm_role })); } catch (e) {}
+}
+
 function startSession(p) {
-  currentUser = { username: p.username, role: p.crm_role === 'admin' ? 'admin' : 'moderator', token: p.token };
-  return SKAUTH.crmTeam().then(function(rows) {
+  currentUser = { username: p.username, role: p.crm_role === 'admin' ? 'admin' : 'moderator' };
+  try { ACCOUNTS = JSON.parse(localStorage.getItem('ourapps-crm-team') || '[]'); } catch (e) { ACCOUNTS = []; }
+  document.getElementById('login-overlay').classList.add('hidden');
+  try { applyRole(); } catch(e) { console.error('applyRole error:', e); }
+  SKAUTH.crmTeam().then(function(rows) {
     ACCOUNTS = rows.map(function(r){ return { username: r.username, role: r.crm_role }; });
-  }).catch(function(){}).then(function(){
-    document.getElementById('login-overlay').classList.add('hidden');
-    try { applyRole(); } catch(e) { console.error('applyRole error:', e); }
-  });
+    try { localStorage.setItem('ourapps-crm-team', JSON.stringify(ACCOUNTS)); } catch (e) {}
+  }).catch(function(){});
 }
 
 function showLogin() {
@@ -1539,6 +1559,7 @@ function doLogin() {
   if (!user || !pass) return;
   SKAUTH.crmSignIn(user, pass).then(function(p) {
     document.getElementById('login-pass').value = '';
+    rememberProfile(p);
     startSession(p);
   }).catch(function(e) {
     err.textContent = /Invalid login/i.test(e.message) ? 'Incorrect username or password.' : e.message;
@@ -1613,6 +1634,7 @@ function applyRole() {
 
 function doLogout() {
   localStorage.removeItem('sk_session');
+  localStorage.removeItem('ourapps-crm-profile');
   SKAUTH.crmSignOut().then(function(){ location.reload(); });
 }
 
@@ -2103,25 +2125,30 @@ function fetchAllOrders(){
       return r.json().then(function(rows){ return { rows: rows, total: total }; });
     });
   }
-  return getPage(0, true).then(function(first){
-    var rows = Array.isArray(first.rows) ? first.rows : [];
-    var total = first.total;
-    if (total === null || total <= rows.length){
-      // count unknown: keep paging sequentially until a short page
-      if (total !== null || rows.length < PAGE) return rows;
-      var all = rows.slice();
+  // Fire every page at once, sized from the cached order count, then fetch any pages still missing.
+  var guess = Math.max(1, Math.ceil(((typeof orders !== 'undefined' && orders.length) ? orders.length + 300 : PAGE) / PAGE));
+  var first = [];
+  for (var i = 0; i < guess; i++) first.push(getPage(i * PAGE, i === 0));
+  return Promise.all(first).then(function(pages){
+    var total = pages[0].total, rows = [];
+    pages.forEach(function(p){ rows = rows.concat(p.rows || []); });
+    var have = guess * PAGE;
+    if (total === null) {
+      var last = pages[pages.length - 1];
+      if (!last.rows || last.rows.length < PAGE) return rows;
       var next = function(from){
         return getPage(from, false).then(function(p){
-          all = all.concat(p.rows || []);
-          return (p.rows && p.rows.length === PAGE) ? next(from + PAGE) : all;
+          rows = rows.concat(p.rows || []);
+          return (p.rows && p.rows.length === PAGE) ? next(from + PAGE) : rows;
         });
       };
-      return next(PAGE);
+      return next(have);
     }
+    if (total <= have) return rows;
     var jobs = [];
-    for (var from = PAGE; from < total; from += PAGE) jobs.push(getPage(from, false));
-    return Promise.all(jobs).then(function(pages){
-      pages.forEach(function(p){ rows = rows.concat(p.rows || []); });
+    for (var from = have; from < total; from += PAGE) jobs.push(getPage(from, false));
+    return Promise.all(jobs).then(function(more){
+      more.forEach(function(p){ rows = rows.concat(p.rows || []); });
       return rows;
     });
   });

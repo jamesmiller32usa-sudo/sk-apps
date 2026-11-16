@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Our Apps</title>
+<link rel="preconnect" href="https://dkwlsfzysjdubcwuemvx.supabase.co" crossorigin>
 <script src="/assets/supabase.js"></script>
 <script src="/assets/auth.js"></script>
 <style>
@@ -138,6 +139,7 @@ function showApps() {
   }).join('');
   document.getElementById('v-gate').classList.add('hidden');
   document.getElementById('v-apps').classList.remove('hidden');
+  APPS.forEach(function (a) { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = a.href; document.head.appendChild(l); });
 }
 document.getElementById('f').addEventListener('submit', async function (e) {
   e.preventDefault();
