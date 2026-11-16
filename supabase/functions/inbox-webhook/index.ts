@@ -129,7 +129,19 @@ function previewText(text: string | null, att: any[] | null) {
   return "";
 }
 
+async function handleRead(platform: string, pageId: string, ev: any) {
+  // The customer opened the chat: everything we sent up to the watermark is seen.
+  const customerId = ev.sender?.id;
+  if (!customerId) return;
+  const { data: contact } = await sb.from("ib_contacts").select("id")
+    .eq("platform", platform).eq("page_id", pageId).eq("external_id", customerId).maybeSingle();
+  if (!contact) return;
+  const at = new Date(Number(ev.read?.watermark) || ev.timestamp || Date.now()).toISOString();
+  await sb.from("ib_conversations").update({ customer_seen_at: at }).eq("contact_id", contact.id);
+}
+
 async function handleMessage(platform: string, pageId: string, ev: any) {
+  if (ev.read) { await handleRead(platform, pageId, ev); return; }
   const msg = ev.message;
   if (!msg && ev.referral && ev.sender?.id) {
     const conv = await getConversation(platform, pageId, ev.sender.id);
@@ -185,7 +197,7 @@ async function handleMessage(platform: string, pageId: string, ev: any) {
   const patch: Record<string, unknown> = {
     last_message_at: sentAt, last_message_text: previewText(text, att), last_message_dir: "in",
     last_inbound_at: sentAt, unread_count: (conv.unread_count || 0) + 1,
-    ai_analyzed_at: null, stage_locked_until: null, is_done: false,
+    ai_analyzed_at: null, stage_locked_until: null, is_done: false, customer_seen_at: sentAt,
   };
   // The customer wrote last, so it is our turn: never leave a "customer is silent" stage on it.
   const waiting = ["fresh_knock", "complaint_corner", "delivery_detective"];

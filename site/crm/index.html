@@ -511,6 +511,83 @@ td.r,th.r{text-align:right}
 .ib-win{font-size:12px;padding:2px 8px;border-radius:10px;font-weight:600}
 .ib-win.ok{background:#e6f4ea;color:#1a7a48}.ib-win.tag{background:#fff3e0;color:#a0590a}.ib-win.no{background:#ffebe9;color:#c4122f}
 
+/* v2: top filters, state tabs, stars, logos */
+.bs-topsel{height:32px;border:1px solid #ced0d4;border-radius:6px;padding:0 8px;font:inherit;font-size:13px;font-weight:700;color:#1c2b33;background:#fff;cursor:pointer;margin-left:6px;max-width:170px}
+.bs-top2{display:flex;align-items:center;gap:6px;padding:6px 12px;border-bottom:1px solid #e4e6eb;background:#fafbfc}
+.bs-top2 .sp{flex:1}
+.bs-state{display:grid;grid-template-columns:repeat(5,auto);gap:4px}
+.bs-state button{border:1px solid #e4e6eb;background:#fff;border-radius:6px;padding:6px 6px;font:inherit;font-size:13px;font-weight:700;color:#1c2b33;cursor:pointer;white-space:nowrap}
+.bs-state button b{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#f0f2f5;color:#1c2b33;font-size:11.5px;line-height:18px;text-align:center;margin-left:2px}
+.bs-state button.on{background:#e7f0fd;border-color:#a9c8f5;color:#0a66d8}
+.bs-state button.on b{background:#0a66d8;color:#fff}
+.bs-star-i{color:#f7a325}
+.bs-item{position:relative}
+.bs-fstar{position:absolute;right:10px;bottom:10px;width:30px;height:30px;border-radius:6px;border:none;background:transparent;color:#b0b3b8;font-size:20px;line-height:30px;cursor:pointer;display:none}
+.bs-item:hover .bs-fstar{display:block;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.bs-fstar.on{display:block;color:#fff;background:#f7a325!important}
+.bs-plogo{width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid #e4e6eb;vertical-align:middle}
+.bs-tag.pg{padding:0 6px 0 2px;background:#fff}
+.bs-ibtn.star.on{background:#f7a325;border-color:#f7a325;color:#fff}
+.bs-pend{display:flex;align-items:center;gap:8px;margin:0 0 6px 38px}
+.bs-pend img{width:56px;height:56px;border-radius:8px;object-fit:cover;border:1px solid #e4e6eb}
+.bs-pend button{border:none;background:#f0f2f5;border-radius:50%;width:22px;height:22px;cursor:pointer}
+/* saved replies popup (Business Suite style) */
+.bs-pop.sr{width:390px;max-height:420px}
+.bs-pop.sr .ph{justify-content:space-between}
+.bs-pop.sr .ph a{font-size:14px;font-weight:600;color:#0a66d8;text-decoration:none;cursor:pointer}
+.sr-tools{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid #e4e6eb}
+.sr-tools input{flex:1;height:32px;border:1px solid #ced0d4;border-radius:6px;padding:0 8px;font:inherit;font-size:13px}
+.sr-tools select{height:32px;border:1px solid #ced0d4;border-radius:6px;font:inherit;font-size:13px;font-weight:600;background:#fff}
+.sr-row{display:flex;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5;position:relative}
+.sr-row:hover{background:#f5f6f7}
+.sr-thumb{width:40px;height:40px;border-radius:6px;flex-shrink:0;background:#f0f2f5;display:grid;place-items:center;overflow:hidden;color:#65676b}
+.sr-thumb img{width:100%;height:100%;object-fit:cover}
+.sr-row b{display:block;font-size:14px;margin-bottom:2px}
+.sr-row span{font-size:13px;color:#1c2b33;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.sr-more{position:absolute;right:8px;top:8px;border:none;background:transparent;font-size:18px;color:#65676b;cursor:pointer;border-radius:6px;width:28px;height:24px}
+.sr-more:hover{background:#e4e6eb}
+/* saved replies section */
+.sr-wrap{display:grid;grid-template-columns:380px 1fr;flex:1;min-height:0}
+.sr-list{border-right:1px solid #e4e6eb;display:flex;flex-direction:column;min-height:0}
+.sr-lhead{display:flex;justify-content:space-between;align-items:center;padding:12px;font-size:16px}
+.sr-items{overflow-y:auto;flex:1}
+.sr-items .sr-row.sel{background:#ebf3fe}
+.sr-edit{padding:20px 24px;overflow-y:auto}
+.sr-edit label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px;color:#1c2b33}
+.sr-edit input[type=text],.sr-edit textarea,.sr-edit select{width:100%;border:1px solid #ced0d4;border-radius:6px;padding:8px 10px;font:inherit;font-size:14px}
+.sr-edit textarea{min-height:160px;resize:vertical}
+.sr-img{display:flex;gap:10px;align-items:center}
+.sr-img img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid #e4e6eb}
+.sr-actions{display:flex;gap:8px;margin-top:18px}
+.bs-pbtn{background:#0a66d8;color:#fff;border:none;border-radius:6px;padding:8px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.bs-dbtn{background:#fff;color:#c4122f;border:1px solid #ffc8c2;border-radius:6px;padding:8px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+/* report */
+.rp-wrap{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto;background:#f7f8fa}
+.rp-bar{display:flex;gap:6px;align-items:center;padding:12px 16px;border-bottom:1px solid #e4e6eb;background:#fff;flex-wrap:wrap}
+.rp-bar button{border:1px solid #ced0d4;background:#fff;border-radius:6px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.rp-bar button.on{background:#e7f0fd;border-color:#a9c8f5;color:#0a66d8}
+.rp-custom{margin-left:auto;font-size:13px;color:#65676b;display:flex;gap:6px;align-items:center}
+.rp-custom input{height:30px;border:1px solid #ced0d4;border-radius:6px;padding:0 6px;font:inherit}
+.rp-body{padding:16px;display:flex;flex-direction:column;gap:16px}
+.rp-h{font-size:13px;font-weight:700;color:#65676b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px}
+.rp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rp-card{background:#fff;border:1px solid #e4e6eb;border-radius:8px;padding:12px 14px;cursor:default}
+.rp-card.click{cursor:pointer}.rp-card.click:hover{border-color:#a9c8f5}
+.rp-card .n{font-size:26px;font-weight:700;color:#1c2b33;line-height:1.1}
+.rp-card .l{font-size:13px;color:#65676b;margin-top:4px}
+.rp-card.red .n{color:#c4122f}.rp-card.blue .n{color:#0a66d8}.rp-card.orange .n{color:#d97706}.rp-card.green .n{color:#1a7a48}
+.rp-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rp-box{background:#fff;border:1px solid #e4e6eb;border-radius:8px;padding:14px}
+.rp-stage{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;padding:5px 0;font-size:13px;cursor:pointer}
+.rp-stage .bar{height:10px;background:#f0f2f5;border-radius:5px;overflow:hidden}
+.rp-stage .bar i{display:block;height:100%;background:#0a7cff;border-radius:5px}
+.rp-stage .num{text-align:right;font-weight:700}
+.rp-stage .num em{font-style:normal;color:#c4122f;font-weight:600;font-size:12px;margin-left:4px}
+.rp-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.rp-tbl th{text-align:left;color:#65676b;font-weight:600;padding:6px 8px;border-bottom:1px solid #e4e6eb}
+.rp-tbl td{padding:8px;border-bottom:1px solid #f0f2f5}
+.rp-note{font-size:12px;color:#65676b;margin-top:8px}
+@media (max-width:1250px){.rp-two{grid-template-columns:1fr}.sr-wrap{grid-template-columns:1fr}}
 /* reminders + tables (other tabs) */
 .ib-panel{flex:1;display:flex;flex-direction:column;min-height:0;background:#fff;overflow:hidden}
 .ib-panel-head{padding:10px 12px;border-bottom:1px solid #e4e6eb;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -938,14 +1015,23 @@ td.r,th.r{text-align:right}
     <div id="page-inbox" class="page">
       <div class="bs-card">
       <div class="bs-top">
-        <button class="ib-tab active" data-v="chats" data-ch="" onclick="IB.tab('chats','')">All messages</button>
-        <button class="ib-tab" data-v="chats" data-ch="messenger" onclick="IB.tab('chats','messenger')">Messenger</button>
-        <button class="ib-tab" data-v="chats" data-ch="instagram" onclick="IB.tab('chats','instagram')">Instagram</button>
-        <button class="ib-tab" data-v="chats" data-ch="whatsapp" onclick="IB.tab('chats','whatsapp')">WhatsApp</button>
+        <button class="ib-tab active" data-v="chats" data-ch="" onclick="IB.tab('chats','')">All messages <span class="bs-badge" id="ib-n-all" style="display:none"></span></button>
+        <button class="ib-tab" data-v="chats" data-ch="messenger" onclick="IB.tab('chats','messenger')">Messenger <span class="bs-badge" id="ib-n-msgr" style="display:none"></span></button>
+        <button class="ib-tab" data-v="chats" data-ch="instagram" onclick="IB.tab('chats','instagram')">Instagram <span class="bs-badge" id="ib-n-ig" style="display:none"></span></button>
+        <button class="ib-tab" data-v="chats" data-ch="whatsapp" onclick="IB.tab('chats','whatsapp')">WhatsApp <span class="bs-badge" id="ib-n-wa" style="display:none"></span></button>
         <button class="ib-tab" data-v="com" data-ch="facebook" onclick="IB.tab('com','facebook')">Facebook comments <span class="bs-badge" id="ib-com-n" style="display:none"></span></button>
-        <button class="ib-tab" data-v="com" data-ch="instagram-c" onclick="IB.tab('com','instagram')">Instagram comments</button>
+        <button class="ib-tab" data-v="com" data-ch="instagram-c" onclick="IB.tab('com','instagram')">Instagram comments <span class="bs-badge" id="ib-n-igc" style="display:none"></span></button>
         <span class="sp"></span>
+        <select class="bs-topsel" id="ib-pages" onchange="IB.setPage(this.value)"></select>
+        <select class="bs-topsel" id="ib-f-st" onchange="IB.fsel(this)"></select>
+        <select class="bs-topsel" id="ib-f-as" onchange="IB.fsel(this)"></select>
+        <select class="bs-topsel" id="ib-box" onchange="IB.fsel(this)"><option value="inbox">Inbox</option><option value="done">Done</option><option value="spam">Spam</option></select>
+      </div>
+      <div class="bs-top2">
         <span class="bs-live"><span class="ib-dot"></span><span id="ib-live-txt">Live</span></span>
+        <span class="sp"></span>
+        <button class="bs-tbtn" data-v="rep" onclick="IB.tab('rep','')">Report</button>
+        <button class="bs-tbtn" data-v="sr" onclick="IB.tab('sr','')">Saved replies</button>
         <button class="bs-tbtn" data-v="rem" onclick="IB.tab('rem','')">Reminders</button>
         <button class="bs-tbtn ib-admin" data-v="set" onclick="IB.tab('set','')">Settings</button>
       </div>
@@ -955,17 +1041,13 @@ td.r,th.r{text-align:right}
         <div class="bs-grid">
           <div class="bs-col">
             <div class="bs-lhead">
-              <div class="bs-srow">
-                <div class="bs-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#65676b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="ib-q" placeholder="Search" oninput="IB.debounceLoad()"></div>
-                <select class="bs-sel" id="ib-pages" onchange="IB.setPage(this.value)"></select>
-              </div>
-              <div class="bs-fchips">
-                <button class="bs-fc" data-f="unread" onclick="IB.flt(this)">Unread</button>
-                <button class="bs-fc" data-f="wait" onclick="IB.flt(this)">Waiting</button>
-                <button class="bs-fc" data-f="stuck" onclick="IB.flt(this)">Over limit</button>
-                <button class="bs-fc" data-f="ads" onclick="IB.flt(this)">Ad replies</button>
-                <select class="bs-fsel" id="ib-f-st" onchange="IB.fsel(this)"></select>
-                <select class="bs-fsel" id="ib-f-as" onchange="IB.fsel(this)"></select>
+              <div class="bs-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#65676b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="ib-q" placeholder="Search" oninput="IB.debounceLoad()"></div>
+              <div class="bs-state">
+                <button data-f="unread" onclick="IB.flt(this)">Unread <b id="ib-c-unread">0</b></button>
+                <button data-f="read" onclick="IB.flt(this)">Read <b id="ib-c-read">0</b></button>
+                <button data-f="unanswered" onclick="IB.flt(this)">Unanswered <b id="ib-c-unanswered">0</b></button>
+                <button data-f="seen" onclick="IB.flt(this)">Seen <b id="ib-c-seen">0</b></button>
+                <button data-f="follow" onclick="IB.flt(this)" title="Follow up"><span class="bs-star-i">★</span> <b id="ib-c-follow">0</b></button>
               </div>
             </div>
             <div class="ib-count" id="ib-count">Loading…</div>
@@ -973,6 +1055,32 @@ td.r,th.r{text-align:right}
           </div>
           <div class="bs-col" id="ib-chat"><div class="ib-empty">Select a conversation</div></div>
           <div class="bs-col"><div class="ib-det" id="ib-det"></div></div>
+        </div>
+      </div>
+
+      <!-- SAVED REPLIES -->
+      <div class="ib-view" id="ib-v-sr">
+        <div class="sr-wrap">
+          <div class="sr-list">
+            <div class="sr-lhead"><b>Saved replies</b><button class="bs-tbtn" onclick="IB.srNew()">+ Add new</button></div>
+            <div class="bs-search" style="margin:0 12px 8px"><input id="ib-sr-q2" placeholder="Search" oninput="IB.srRender()"></div>
+            <div id="ib-sr-items" class="sr-items"></div>
+          </div>
+          <div class="sr-edit" id="ib-sr-edit"><div class="ib-empty">Choose a saved reply or add a new one</div></div>
+        </div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="ib-view" id="ib-v-rep">
+        <div class="rp-wrap">
+          <div class="rp-bar">
+            <button data-r="today" onclick="IB.repRange(this)" class="on">Today</button>
+            <button data-r="yesterday" onclick="IB.repRange(this)">Yesterday</button>
+            <button data-r="week" onclick="IB.repRange(this)">This week</button>
+            <button data-r="month" onclick="IB.repRange(this)">This month</button>
+            <span class="rp-custom">From <input type="date" id="ib-rp-from" onchange="IB.repRange(null)"> to <input type="date" id="ib-rp-to" onchange="IB.repRange(null)"></span>
+          </div>
+          <div id="ib-rp-body" class="rp-body"><div class="ib-empty">Loading…</div></div>
         </div>
       </div>
 
@@ -1782,6 +1890,14 @@ var IB = (function(){
     if (h < 168) return { k: 'tag', t: 'Human agent tag · ' + Math.ceil((168 - h) / 24) + 'd left' };
     return { k: 'no', t: 'Closed (over 7 days)' };
   }
+  function rpc(name, body){
+    return fetch(SUPA_URL + '/rest/v1/rpc/' + name, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY }, body: JSON.stringify(body || {}) }).then(function(r){ return r.json(); });
+  }
+  function pageLogo(id, size){
+    var p = S.pages.find(function(x){ return x.page_id === id; }) || {};
+    size = size || 20;
+    return '<img class="bs-plogo" style="width:' + size + 'px;height:' + size + 'px" src="' + esc(p.picture || ('https://graph.facebook.com/' + id + '/picture?type=square')) + '" title="' + esc(p.name || '') + '" alt="">';
+  }
   function users(){ return (typeof ACCOUNTS !== 'undefined' ? ACCOUNTS : []).map(function(a){ return a.username; }).filter(function(u){ return u !== 'admin'; }); }
 
   // ── boot ──
@@ -1790,7 +1906,7 @@ var IB = (function(){
     return Promise.all([
       q('ib_pages?select=*&active=is.true&order=short_code'),
       q('ib_stages?select=*&order=sort_order'),
-      q('ib_templates?select=*&active=is.true&order=created_at')
+      q('ib_templates?select=*&active=is.true&order=use_count.desc,created_at')
     ]).then(function(r){
       S.pages = r[0]; S.stages = r[1]; S.tpls = r[2];
       S.stageMap = {}; S.stages.forEach(function(s){ S.stageMap[s.key] = s; });
@@ -1852,12 +1968,22 @@ var IB = (function(){
   function cur(){ return S.list.find(function(x){ return x.id === S.sel; }); }
 
   // ── list ──
-  var COLS = 'id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done';
-  S.f = {}; S.ch = '';
-  function flt(b){ var k = b.dataset.f; S.f[k] = !S.f[k]; b.classList.toggle('on', !!S.f[k]); load(); }
-  function fsel(el){ el.classList.toggle('on', !!el.value); load(); }
+  var COLS = 'id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,last_outbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done,follow_up,is_spam,customer_seen_at,st_seen';
+  S.flt = ''; S.ch = '';
+  function flt(b){
+    var k = b.dataset.f; S.flt = S.flt === k ? '' : k;
+    document.querySelectorAll('#page-inbox .bs-state button').forEach(function(x){ x.classList.toggle('on', x.dataset.f === S.flt); });
+    load(); counts();
+  }
+  function fsel(el){ if (el.classList.contains('bs-fsel')) el.classList.toggle('on', !!el.value); load(); counts(); }
+  function boxVal(){ return ($('ib-box') || {}).value || 'inbox'; }
+  function assignedVal(){ var as = $('ib-f-as').value; return as === '__me' ? me() : (as || null); }
   function listQuery(){
-    var p = 'ib_conv_view?select=' + COLS + '&order=last_message_at.desc.nullslast&limit=300';
+    var p = 'ib_conv_view?select=' + COLS + '&order=last_message_at.desc.nullslast&limit=300&is_deleted=is.false';
+    var box = boxVal();
+    if (box === 'done') p += '&is_done=is.true&is_spam=is.false';
+    else if (box === 'spam') p += '&is_spam=is.true';
+    else p += '&is_done=is.false&is_spam=is.false';
     if (S.page) p += '&page_id=eq.' + S.page;
     if (S.ch) p += '&platform=eq.' + S.ch;
     var as = $('ib-f-as').value;
@@ -1865,13 +1991,25 @@ var IB = (function(){
     else if (as === '__none') p += '&assigned_to=is.null';
     else if (as) p += '&assigned_to=eq.' + encodeURIComponent(as);
     var st = $('ib-f-st').value; if (st) p += '&stage_key=eq.' + st;
-    if (S.f.unread) p += '&unread_count=gt.0';
-    if (S.f.stuck) p += '&is_stuck=is.true';
-    if (S.f.wait) p += '&last_message_dir=eq.in';
-    if (S.f.ads) p += '&source_ad_id=not.is.null';
+    if (S.flt === 'unread') p += '&unread_count=gt.0';
+    if (S.flt === 'read') p += '&unread_count=eq.0';
+    if (S.flt === 'unanswered') p += '&unread_count=eq.0&last_message_dir=eq.in';
+    if (S.flt === 'seen') p += '&st_seen=is.true';
+    if (S.flt === 'follow') p += '&follow_up=is.true';
     var s = ($('ib-q').value || '').trim().replace(/[(),*]/g, ' ');
     if (s) p += '&or=(name.ilike.*' + encodeURIComponent(s) + '*,last_message_text.ilike.*' + encodeURIComponent(s) + '*)';
     return p;
+  }
+  function setBadge(id, n){ var b = $(id); if (!b) return; b.style.display = n ? '' : 'none'; b.textContent = n > 999 ? '999+' : n; }
+  function counts(){
+    var as = $('ib-f-as').value;
+    rpc('ib_counts', { p_page: S.page || null, p_stage: $('ib-f-st').value || null, p_assigned: as === '__me' ? me() : (as || null), p_platform: S.ch || null, p_box: boxVal() }).then(function(c){
+      if (!c || c.code) return;
+      ['unread', 'read', 'unanswered', 'seen'].forEach(function(k){ $('ib-c-' + k).textContent = c[k]; });
+      $('ib-c-follow').textContent = c.follow_up;
+      setBadge('ib-n-all', c.tab_all); setBadge('ib-n-msgr', c.tab_messenger); setBadge('ib-n-ig', c.tab_instagram); setBadge('ib-n-wa', c.tab_whatsapp);
+      setBadge('ib-com-n', c.com_facebook); setBadge('ib-n-igc', c.com_instagram);
+    }).catch(function(){});
   }
   function load(silent){
     if (S.loading) return;
@@ -1902,14 +2040,16 @@ var IB = (function(){
     S.list.forEach(function(c){
       var un = c.unread_count > 0;
       var tags = stageTag(c) +
-        '<span class="bs-tag pg-' + pageCode(c.page_id) + '">' + esc(pageCode(c.page_id)) + '</span>' +
+        '<span class="bs-tag pg">' + pageLogo(c.page_id, 18) + ' ' + esc(pageCode(c.page_id)) + '</span>' +
+        (c.st_seen ? '<span class="bs-tag" title="Customer saw our last message">Seen</span>' : '') +
         (c.source_ad_id ? '<span class="bs-tag ad">' + ADI + 'ad_id.' + esc(String(c.source_ad_id).slice(-4)) + '</span>' : '') +
         (c.assigned_to ? '<span class="bs-tag who">' + esc(c.assigned_to) + '</span>' : '');
       h += '<div class="bs-item' + (c.id === S.sel ? ' sel' : '') + (un ? ' unread' : '') + '" onclick="IB.open(\'' + c.id + '\')">' +
         ava(c.name, c.profile_pic, 48, c.platform) +
         '<div class="bs-imain"><div class="bs-l1"><span class="bs-name">' + esc(c.name || 'Facebook user') + '</span><span class="bs-time">' + listTime(c.last_message_at) + '</span></div>' +
         '<div class="bs-prev"><span>' + (c.last_message_dir === 'out' ? 'You: ' : '') + esc(c.last_message_text || '') + '</span>' + (un ? '<i class="bs-udot"></i>' : '') + '</div>' +
-        '<div class="bs-tags">' + tags + '</div></div></div>';
+        '<div class="bs-tags">' + tags + '</div></div>' +
+        '<button class="bs-fstar' + (c.follow_up ? ' on' : '') + '" title="' + (c.follow_up ? 'Remove follow up' : 'Mark as follow up') + '" onclick="event.stopPropagation();IB.star(\'' + c.id + '\')">★</button></div>';
     });
     $('ib-list').innerHTML = h || '<div class="ib-empty">No conversations match these filters</div>';
   }
@@ -1932,6 +2072,9 @@ var IB = (function(){
     like: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 10h4v11H2zM8 21h9.3a2 2 0 002-1.6l1.6-7.6A2 2 0 0019 9.4h-5.4l.8-4a1.8 1.8 0 00-3.2-1.4L8 9z"/></svg>',
     send: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5l18-8.5L3 3.5 3 10l12 2-12 2z"/></svg>',
     done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    spam: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L1.5 21h21L12 2.5zm-1 6h2v6.5h-2V8.5zm0 8.5h2v2h-2v-2z"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
     mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6l8.5 7 8.5-7"/></svg>'
   };
   function renderChatShell(c){
@@ -1945,7 +2088,7 @@ var IB = (function(){
       '<div id="ib-adbar"></div>' +
       '<div class="ib-msgs" id="ib-msgs"><div class="ib-empty">Loading…</div></div>' +
       '<div class="bs-compose">' + note +
-        '<div class="bs-cbox" id="ib-cbox">' +
+        '<div class="bs-cbox" id="ib-cbox"><div id="ib-pend"></div>' +
           '<div class="bs-crow">' + pageAva(c.page_id) +
             '<textarea id="ib-text" rows="1" placeholder="Reply in ' + (c.platform === 'instagram' ? 'Instagram' : 'Messenger') + '…"' + (canSend ? '' : ' disabled') + '></textarea></div>' +
           '<div class="bs-ctools" id="ib-tools">' +
@@ -1984,8 +2127,11 @@ var IB = (function(){
     $('ib-head').innerHTML = ava(c.name, c.profile_pic, 40) +
       '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div>' + asg + '</div>' +
       '<div class="bs-icons">' + st +
+        '<button class="bs-ibtn" title="' + (c.is_spam ? 'Not spam' : 'Move to spam') + '" onclick="IB.spam()">' + ICON.spam + '</button>' +
+        '<button class="bs-ibtn" title="Delete conversation" onclick="IB.del()">' + ICON.trash + '</button>' +
+        '<button class="bs-ibtn star' + (c.follow_up ? ' on' : '') + '" title="' + (c.follow_up ? 'Remove follow up' : 'Mark as follow up') + '" onclick="IB.star()">' + ICON.star + '</button>' +
         '<button class="bs-ibtn" title="Mark as unread" onclick="IB.unread()">' + ICON.mail + '</button>' +
-        '<button class="bs-ibtn' + (c.is_done ? ' on' : '') + '" title="' + (c.is_done ? 'Move back to inbox' : 'Mark as done') + '" onclick="IB.done()">' + ICON.done + '</button>' +
+        '<button class="bs-ibtn' + (c.is_done ? ' on' : '') + '" title="' + (c.is_done ? 'Move to main inbox' : 'Move to done') + '" onclick="IB.done()">' + ICON.done + '</button>' +
       '</div>';
     var ad = '';
     if (c.source_post_id && !S.adHidden) {
@@ -2065,12 +2211,26 @@ var IB = (function(){
   }
   function send(text){
     var ta = $('ib-text'); if (!ta || ta.disabled || !S.sel) return;
+    var pend = S.pending; S.pending = null; if ($('ib-pend')) $('ib-pend').innerHTML = '';
     text = typeof text === 'string' ? text : ta.value.trim();
+    if (pend && !text) { ta.value = ''; sendUrl(pend); return; }
+    if (pend) setTimeout(function(){ sendUrl(pend); }, 1200);
     if (!text) text = '👍';
     if (typeof arguments[0] !== 'string') { ta.value = ''; autoGrow(ta); $('ib-send-btn').innerHTML = ICON.like; }
     pushLocal({ text: text });
     fn('inbox-send', { conversation_id: S.sel, text: text, username: me() }).then(afterSend).catch(function(e){ afterSend({ ok: false, error: e.message }); });
   }
+  function sendUrl(url){
+    var conv = S.sel;
+    pushLocal({ text: null, attachments: [{ type: 'image', url: url }] });
+    fn('inbox-send', { conversation_id: conv, attachment_url: url, attachment_type: 'image', username: me() }).then(afterSend).catch(function(e){ afterSend({ ok: false, error: e.message }); });
+  }
+  function setPending(url){
+    S.pending = url;
+    var el = $('ib-pend'); if (!el) return;
+    el.innerHTML = url ? '<div class="bs-pend"><img src="' + esc(url) + '"><button title="Remove" onclick="IB.clearPending()">×</button><span class="ib-note">Photo will be sent with this reply</span></div>' : '';
+  }
+  function clearPending(){ setPending(null); }
   function pickFile(inp){ var f = inp.files && inp.files[0]; inp.value = ''; if (f) upload(f); }
   function upload(file){
     if (!S.sel || !file) return;
@@ -2093,30 +2253,154 @@ var IB = (function(){
   function pop(kind){
     var tools = $('ib-tools'); var old = document.getElementById('ib-pop');
     if (old) { var same = old.dataset.k === kind; old.remove(); if (same) return; }
-    var el = document.createElement('div'); el.className = 'bs-pop'; el.id = 'ib-pop'; el.dataset.k = kind;
+    var el = document.createElement('div'); el.className = 'bs-pop' + (kind === 'saved' ? ' sr' : ''); el.id = 'ib-pop'; el.dataset.k = kind;
     if (kind === 'emoji') {
       el.style.width = '330px';
       el.innerHTML = '<div class="bs-emo">' + EMOJI.map(function(e){ return '<button onclick="IB.addEmoji(\'' + e + '\')">' + e + '</button>'; }).join('') + '</div>';
     } else {
-      el.innerHTML = '<div class="ph">Saved replies<input id="ib-sr-q" placeholder="Search" oninput="IB.srFilter()"></div><div class="pl" id="ib-sr-l"></div>' +
-        (isAdmin() ? '<div style="padding:8px 12px;border-top:1px solid #e4e6eb"><a href="#" onclick="IB.tab(\'set\',\'\');return false" style="font-size:13px;color:#0a66d8;font-weight:600;text-decoration:none">Manage saved replies</a></div>' : '');
+      el.innerHTML = '<div class="ph">Saved replies <a onclick="IB.tab(\'sr\',\'\');IB.srNew()">+ Add new</a></div>' +
+        '<div class="sr-tools"><input id="ib-sr-q" placeholder="Search" oninput="IB.srFilter()"><select id="ib-sr-sort" onchange="IB.srFilter()"><option value="freq">Frequently used</option><option value="new">Recently added</option><option value="az">A to Z</option></select></div>' +
+        '<div class="pl" id="ib-sr-l"></div>';
     }
     tools.appendChild(el);
     if (kind === 'saved') { srFilter(); $('ib-sr-q').focus(); }
     setTimeout(function(){ document.addEventListener('mousedown', closePop); }, 0);
   }
   function closePop(e){ var p = document.getElementById('ib-pop'); if (!p) { document.removeEventListener('mousedown', closePop); return; } if (p.contains(e.target) || (e.target.closest && e.target.closest('.bs-tool'))) return; p.remove(); document.removeEventListener('mousedown', closePop); }
+  var IMGI = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>';
+  function srSorted(qv, sort){
+    var list = S.tpls.filter(function(t){ return !qv || (t.name + ' ' + t.body).toLowerCase().indexOf(qv) > -1; });
+    if (sort === 'az') list.sort(function(a, b){ return a.name.localeCompare(b.name); });
+    else if (sort === 'new') list.sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); });
+    else list.sort(function(a, b){ return (b.use_count || 0) - (a.use_count || 0); });
+    return list;
+  }
+  function srRow(t, onclick, sel){
+    return '<div class="sr-row' + (sel ? ' sel' : '') + '" onclick="' + onclick + '"><div class="sr-thumb">' + (t.image_url ? '<img src="' + esc(t.image_url) + '">' : IMGI) + '</div>' +
+      '<div style="min-width:0;padding-right:26px"><b>' + esc(t.name) + '</b><span>' + esc(t.body) + '</span></div></div>';
+  }
   function srFilter(){
-    var s = ($('ib-sr-q').value || '').toLowerCase();
-    var list = S.tpls.filter(function(t){ return !s || (t.name + ' ' + t.body).toLowerCase().indexOf(s) > -1; });
-    $('ib-sr-l').innerHTML = list.map(function(t){ return '<div class="bs-sr" onclick="IB.useSaved(\'' + t.id + '\')"><b>' + esc(t.name) + '</b><span>' + esc(t.body) + '</span></div>'; }).join('') || '<div class="ib-note" style="padding:14px">No saved replies</div>';
+    var qv = ($('ib-sr-q').value || '').toLowerCase(), sort = $('ib-sr-sort').value;
+    $('ib-sr-l').innerHTML = srSorted(qv, sort).map(function(t){
+      return srRow(t, 'IB.useSaved(\'' + t.id + '\')').replace('</div></div>', '</div><button class="sr-more" title="Edit" onclick="event.stopPropagation();IB.tab(\'sr\',\'\');IB.srOpen(\'' + t.id + '\')">…</button></div>');
+    }).join('') || '<div class="ib-note" style="padding:14px">No saved replies yet. Click "+ Add new".</div>';
   }
   function useSaved(id){
     var t = S.tpls.find(function(x){ return x.id === id; }); var p = document.getElementById('ib-pop'); if (p) p.remove();
     if (!t) return;
     var c = cur(), ta = $('ib-text');
     ta.value = fillName(t.body, c && c.name); autoGrow(ta); ta.focus(); $('ib-send-btn').innerHTML = ICON.send;
+    if (t.image_url) setPending(t.image_url);
+    t.use_count = (t.use_count || 0) + 1;
+    patch('ib_templates?id=eq.' + t.id, { use_count: t.use_count });
   }
+  // ── saved replies section ──
+  function srRender(){
+    var qv = (($('ib-sr-q2') || {}).value || '').toLowerCase();
+    $('ib-sr-items').innerHTML = srSorted(qv, 'az').map(function(t){ return srRow(t, 'IB.srOpen(\'' + t.id + '\')', t.id === S.srSel); }).join('') || '<div class="ib-note" style="padding:14px">No saved replies yet</div>';
+  }
+  function srOpen(id){
+    S.srSel = id;
+    var t = S.tpls.find(function(x){ return x.id === id; }) || { id: '', name: '', body: '', image_url: null, stage_key: null };
+    S.srImg = t.image_url || null;
+    var st = '<option value="">Any stage</option>' + S.stages.map(function(s){ return '<option value="' + s.key + '"' + (s.key === t.stage_key ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('');
+    $('ib-sr-edit').innerHTML = '<div style="font-size:18px;font-weight:700">' + (t.id ? 'Edit saved reply' : 'New saved reply') + '</div>' +
+      '<label>Name</label><input type="text" id="ib-sr-name" value="' + esc(t.name) + '" placeholder="For example: Canvas price">' +
+      '<label>Message</label><textarea id="ib-sr-body" placeholder="Write the reply. {name} becomes the customer\'s first name.">' + esc(t.body) + '</textarea>' +
+      '<label>Photo (optional)</label><div class="sr-img" id="ib-sr-imgbox"></div>' +
+      '<label>Stage (optional, also used for reminders)</label><select id="ib-sr-stage">' + st + '</select>' +
+      '<div class="sr-actions"><button class="bs-pbtn" onclick="IB.srSave()">Save</button>' + (t.id ? '<button class="bs-dbtn" onclick="IB.srDel()">Delete</button>' : '') + '</div>';
+    srImgBox(); srRender();
+  }
+  function srImgBox(){
+    $('ib-sr-imgbox').innerHTML = (S.srImg ? '<img src="' + esc(S.srImg) + '"><button class="bs-tbtn" onclick="IB.srImg(null)">Remove photo</button>' : '') +
+      '<input type="file" id="ib-sr-file" accept="image/*" style="display:none" onchange="IB.srUpload(this)"><button class="bs-tbtn" onclick="document.getElementById(\'ib-sr-file\').click()">' + (S.srImg ? 'Change photo' : 'Add photo') + '</button>';
+  }
+  function srImg(u){ S.srImg = u; srImgBox(); }
+  function srUpload(inp){
+    var f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+    var ext = (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    var path = 'saved/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    $('ib-sr-imgbox').insertAdjacentHTML('beforeend', '<span class="ib-note">Uploading…</span>');
+    fetch(SUPA_URL + '/storage/v1/object/inbox-media/' + path, { method: 'POST', headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': f.type || 'image/jpeg', 'x-upsert': 'true' }, body: f })
+      .then(function(r){ if (!r.ok) throw new Error('upload failed'); srImg(SUPA_URL + '/storage/v1/object/public/inbox-media/' + path); })
+      .catch(function(e){ alertBox(e.message); srImgBox(); });
+  }
+  function srNew(){ srOpen(''); }
+  function srReload(){ return q('ib_templates?select=*&active=is.true&order=use_count.desc,created_at').then(function(t){ S.tpls = t; fillTplSelect(); srRender(); }); }
+  function srSave(){
+    var body = { name: $('ib-sr-name').value.trim(), body: $('ib-sr-body').value.trim(), image_url: S.srImg, stage_key: $('ib-sr-stage').value || null, updated_at: new Date().toISOString() };
+    if (!body.name || !body.body) { alertBox('Name and message are required'); return; }
+    var op = S.srSel ? patch('ib_templates?id=eq.' + S.srSel, body) : post('ib_templates', Object.assign({ created_by: me() }, body));
+    op.then(function(){ return srReload(); }).then(function(){
+      if (!S.srSel) { var t = S.tpls.find(function(x){ return x.name === body.name && x.body === body.body; }); if (t) S.srSel = t.id; }
+      srOpen(S.srSel); alertBox('Saved');
+    });
+  }
+  function srDel(){
+    if (!S.srSel || !confirm('Delete this saved reply?')) return;
+    patch('ib_templates?id=eq.' + S.srSel, { active: false }).then(function(){ S.srSel = null; return srReload(); }).then(function(){ $('ib-sr-edit').innerHTML = '<div class="ib-empty">Deleted</div>'; });
+  }
+  // ── report ──
+  function dhakaDay(offset){ var d = new Date(Date.now() + 6 * 3600e3); d.setUTCHours(0, 0, 0, 0); return new Date(d.getTime() - 6 * 3600e3 + (offset || 0) * 864e5); }
+  function repRange(btn){
+    var from, to = new Date(Date.now() + 60000);
+    if (btn) {
+      document.querySelectorAll('#ib-v-rep .rp-bar button').forEach(function(x){ x.classList.toggle('on', x === btn); });
+      var r = btn.dataset.r, today = dhakaDay(0);
+      if (r === 'today') from = today;
+      else if (r === 'yesterday') { from = dhakaDay(-1); to = today; }
+      else if (r === 'week') { var wd = new Date(today.getTime() + 6 * 3600e3).getUTCDay(); from = new Date(today.getTime() - ((wd + 1) % 7) * 864e5); }
+      else { var m = new Date(today.getTime() + 6 * 3600e3); m.setUTCDate(1); from = new Date(m.getTime() - 6 * 3600e3); }
+      $('ib-rp-from').value = ''; $('ib-rp-to').value = '';
+    } else {
+      var f = $('ib-rp-from').value, t = $('ib-rp-to').value; if (!f) return;
+      document.querySelectorAll('#ib-v-rep .rp-bar button').forEach(function(x){ x.classList.remove('on'); });
+      from = new Date(f + 'T00:00:00+06:00'); to = t ? new Date(new Date(t + 'T00:00:00+06:00').getTime() + 864e5) : to;
+    }
+    S.rep = { from: from, to: to }; repLoad();
+  }
+  function repLoad(){
+    if (!S.rep) { repRange(document.querySelector('#ib-v-rep .rp-bar button')); return; }
+    $('ib-rp-body').innerHTML = '<div class="ib-empty">Loading…</div>';
+    rpc('ib_report', { p_from: S.rep.from.toISOString(), p_to: S.rep.to.toISOString(), p_page: S.page || null }).then(function(r){
+      if (!r || !r.now) { $('ib-rp-body').innerHTML = '<div class="ib-empty">Could not load the report</div>'; return; }
+      var card = function(n, l, cls, go){ return '<div class="rp-card ' + (cls || '') + (go ? ' click" onclick="IB.repGo(\'' + go + '\')' : '') + '"><div class="n">' + Number(n).toLocaleString('en-US') + '</div><div class="l">' + l + '</div></div>'; };
+      var max = Math.max.apply(null, r.stages.map(function(s){ return s.count; }).concat([1]));
+      var stages = r.stages.filter(function(s){ return s.count > 0 || !s.is_closed; }).map(function(s){
+        return '<div class="rp-stage" onclick="IB.repStage(\'' + s.key + '\')"><span>' + esc(s.name) + '</span><div class="bar"><i style="width:' + Math.round(s.count / max * 100) + '%"></i></div><span class="num">' + s.count + (s.stuck ? '<em>' + s.stuck + ' late</em>' : '') + '</span></div>';
+      }).join('');
+      var sc = {}; (r.stage_changes || []).forEach(function(x){ sc[x.name] = x.changes; });
+      var mods = r.moderators.map(function(m){
+        return '<tr><td><b>' + esc(m.name) + '</b></td><td>' + m.replies + '</td><td>' + m.chats + '</td><td>' + (sc[m.name] || 0) + '</td><td>' + (m.last_at ? listTime(m.last_at) : '-') + '</td></tr>';
+      }).join('') || '<tr><td colspan="5" class="ib-note">No replies in this period</td></tr>';
+      $('ib-rp-body').innerHTML =
+        '<div><div class="rp-h">Right now</div><div class="rp-cards">' +
+          card(r.now.unread, 'Unread', 'red', 'unread') + card(r.now.unanswered, 'Unanswered', 'orange', 'unanswered') + card(r.now.seen, 'Seen, no reply', 'blue', 'seen') +
+          card(r.now.read, 'Read', '', 'read') + card(r.now.follow_up, 'Follow up', 'orange', 'follow') + '</div></div>' +
+        '<div><div class="rp-h">In this period</div><div class="rp-cards">' +
+          card(r.range.received, 'Messages received') + card(r.range.sent, 'Replies sent', 'green') + card(r.range.chats, 'Chats with activity') + card(r.range.new_customers, 'New customers', 'blue') + '</div></div>' +
+        '<div class="rp-two"><div class="rp-box"><div class="rp-h">Chats in each stage (now)</div>' + stages + '</div>' +
+        '<div class="rp-box"><div class="rp-h">Moderators (this period)</div><table class="rp-tbl"><tr><th>Name</th><th>Replies</th><th>Chats</th><th>Stage changes</th><th>Last reply</th></tr>' + mods + '</table>' +
+        '<div class="rp-note">Replies sent from Meta Business Suite show as "Business Suite" because Meta does not say which person sent them. Replies sent from this inbox show the moderator\'s name.</div></div></div>';
+    });
+  }
+  function repGo(f){
+    tab('chats', '');
+    S.flt = f; document.querySelectorAll('#page-inbox .bs-state button').forEach(function(x){ x.classList.toggle('on', x.dataset.f === f); });
+    load(); counts();
+  }
+  function repStage(k){ tab('chats', ''); $('ib-f-st').value = k; load(); counts(); }
+  // ── actions (Business Suite buttons) ──
+  function act(body, id){
+    var c = id ? S.list.find(function(x){ return x.id === id; }) : cur(); if (!c) return Promise.resolve();
+    Object.assign(c, body); renderList(); if (c.id === S.sel) renderHead(c);
+    return patch('ib_conversations?id=eq.' + c.id, body).then(function(){ counts(); });
+  }
+  function star(id){ var c = id ? S.list.find(function(x){ return x.id === id; }) : cur(); if (c) act({ follow_up: !c.follow_up }, c.id); }
+  function closeChat(){ S.sel = null; $('ib-chat').innerHTML = '<div class="ib-empty">Select a conversation</div>'; $('ib-det').innerHTML = ''; }
+  function spam(){ var c = cur(); if (!c) return; act({ is_spam: !c.is_spam }).then(function(){ closeChat(); load(true); }); }
+  function del(){ var c = cur(); if (!c || !confirm('Delete this conversation from the inbox? It is only hidden here; the chat stays in Messenger.')) return; act({ is_deleted: true }).then(function(){ closeChat(); load(true); }); }
   function addEmoji(e){
     var ta = $('ib-text'); var s = ta.selectionStart || ta.value.length;
     ta.value = ta.value.slice(0, s) + e + ta.value.slice(ta.selectionEnd || s); ta.focus(); ta.selectionStart = ta.selectionEnd = s + e.length;
@@ -2146,7 +2430,7 @@ var IB = (function(){
       load(true);
     });
   }
-  function done(){ var c = cur(); if (!c) return; patch('ib_conversations?id=eq.' + c.id, { is_done: !c.is_done }).then(function(){ load(true); }); }
+  function done(){ var c = cur(); if (!c) return; patch('ib_conversations?id=eq.' + c.id, { is_done: !c.is_done }).then(function(){ closeChat(); load(true); counts(); }); }
   function unread(){ var c = cur(); if (!c) return; patch('ib_conversations?id=eq.' + c.id, { unread_count: 1 }).then(function(){ S.sel = null; $('ib-chat').innerHTML = '<div class="ib-empty">Select a conversation</div>'; $('ib-det').innerHTML = ''; load(true); }); }
   function renderDetails(c){
     var w = win(c), s = S.stageMap[c.stage_key];
@@ -2331,13 +2615,15 @@ var IB = (function(){
     if (v === 'rem') remLoad();
     if (v === 'com') comLoad();
     if (v === 'set') setLoad();
+    if (v === 'sr') srRender();
+    if (v === 'rep') repLoad();
   }
   function tab(v, ch){
     if (v === 'chats') { if (S.ch !== ch) { S.ch = ch; S.sel = null; $('ib-chat').innerHTML = '<div class="ib-empty">Select a conversation</div>'; $('ib-det').innerHTML = ''; } }
     if (v === 'com') S.comPlat = ch || 'facebook';
     view(v);
   }
-  function setPage(id){ S.page = id; renderChips(); view(S.v); }
+  function setPage(id){ S.page = id; renderChips(); view(S.v); counts(); }
   function comBadge(){
     supaFetch('ib_comments?select=comment_id&replied=is.false&platform=eq.facebook', { headers: { Prefer: 'count=exact', 'Range-Unit': 'items', Range: '0-0' } }).then(function(r){
       var cr = r.headers.get('Content-Range') || ''; var n = parseInt(cr.split('/')[1], 10) || 0;
@@ -2349,17 +2635,19 @@ var IB = (function(){
     var pg = document.getElementById('page-inbox');
     if (!pg || !pg.classList.contains('active') || document.hidden) return;
     if (S.v === 'chats') load(true);
-    if (++_tk % 10 === 1) comBadge();
+    if (++_tk % 2 === 1) counts();
   }
   function show(){
-    boot().then(function(){ view(S.v); comBadge(); });
+    boot().then(function(){ view(S.v); counts(); });
     if (!S.timer) S.timer = setInterval(tick, 3000);
   }
   return {
     show: show, view: view, tab: tab, setPage: setPage, load: load, debounceLoad: debounceLoad, open: open, send: send, useTpl: useTpl,
     setStage: setStage, assign: assign, remLoad: remLoad, remPick: remPick, remAll: remAll, remFirst: remFirst, remTpl: remTpl,
     remSend: remSend, jump: jump, comLoad: comLoad, comDone: comDone, saveStages: saveStages, addTpl: addTpl, delTpl: delTpl, saveTpls: saveTpls,
-    flt: flt, fsel: fsel, pickFile: pickFile, pop: pop, srFilter: srFilter, useSaved: useSaved, addEmoji: addEmoji, hideAd: hideAd, done: done, unread: unread
+    flt: flt, fsel: fsel, star: star, spam: spam, del: del, clearPending: clearPending,
+    srRender: srRender, srOpen: srOpen, srNew: srNew, srSave: srSave, srDel: srDel, srImg: srImg, srUpload: srUpload,
+    repRange: repRange, repGo: repGo, repStage: repStage, pickFile: pickFile, pop: pop, srFilter: srFilter, useSaved: useSaved, addEmoji: addEmoji, hideAd: hideAd, done: done, unread: unread
   };
 })();
 
