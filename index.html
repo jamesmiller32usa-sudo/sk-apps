@@ -39,22 +39,69 @@ h1{font-size:22px;font-weight:500;margin-bottom:4px}
 .tile .t{font-size:15px;font-weight:600;margin-bottom:4px}
 .tile .d{color:var(--muted);font-size:12.5px;line-height:1.45}
 .empty{color:var(--muted);margin-top:20px}
+
+/* premium animated sign-in */
+#v-login{position:relative;overflow:hidden;background:#070b18}
+#bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+.g1{width:520px;height:520px;background:#3b5bff;top:-140px;left:-120px}
+.g2{width:460px;height:460px;background:#c03a7a;bottom:-160px;right:-100px;animation-delay:-6s}
+.g3{width:340px;height:340px;background:#0fb6a6;top:40%;left:55%;animation-delay:-11s;opacity:.35}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.12)}100%{transform:translate(-40px,70px) scale(.95)}}
+.stage{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center;max-width:1080px;width:100%;padding:32px}
+.hero{color:#fff}
+.hero .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#9fb0ff;margin-bottom:18px;opacity:0;animation:up .8s .1s forwards}
+.hero h2{font-size:46px;line-height:1.08;font-weight:700;letter-spacing:-1px;margin-bottom:18px;opacity:0;animation:up .8s .25s forwards}
+.hero h2 span{background:linear-gradient(90deg,#8fa2ff,#ff8fc4,#7ff0e0,#8fa2ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:300% 0}}
+.quote{min-height:58px;font-size:17px;line-height:1.55;color:#c9d2f5;max-width:470px;transition:opacity .6s,transform .6s}
+.quote.out{opacity:0;transform:translateY(8px)}
+.stats{display:flex;gap:28px;margin-top:34px;opacity:0;animation:up .8s .55s forwards}
+.stat b{display:block;font-size:24px;color:#fff;font-weight:700}
+.stat small{color:#8d97bd;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#v-login .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.45);color:#fff;opacity:0;animation:up .9s .35s forwards;justify-self:end}
+#v-login .logo b,#v-login h1{color:#fff}
+#v-login .sub,#v-login .field label{color:#aab3d6}
+#v-login .field input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff}
+#v-login .field input:focus{border-color:#8fa2ff;box-shadow:0 0 0 3px rgba(143,162,255,.18)}
+#v-login .btn{background:linear-gradient(90deg,#4b6bff,#b23fd1);box-shadow:0 10px 30px rgba(91,96,255,.35);transition:transform .15s,box-shadow .15s}
+#v-login .btn:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(91,96,255,.5)}
+#v-login .err{color:#ff9aa8}
+.foot{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#5d6790;font-size:11.5px;z-index:2}
+@media (max-width:860px){.stage{grid-template-columns:1fr;gap:28px}.hero h2{font-size:32px}.stats{display:none}#v-login .card{justify-self:center}}
+@media (prefers-reduced-motion:reduce){.glow,.hero h2 span{animation:none}}
 </style>
 </head>
 <body>
 
 <div id="v-login" class="wrap hidden">
-  <div class="card">
-    <div class="logo"><div class="logo-box">SK</div><b>SK Apps</b></div>
-    <h1>Sign in</h1>
-    <div class="sub">Use your own username and password</div>
-    <form id="f" autocomplete="on">
-      <div class="field"><label for="u">Username</label><input id="u" autocomplete="username" required></div>
-      <div class="field"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required></div>
-      <button class="btn" id="go" type="submit">Sign In</button>
-      <div class="err" id="err"></div>
-    </form>
+  <canvas id="bg"></canvas>
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div class="stage">
+    <div class="hero">
+      <div class="kicker">Sharanga · Mynflow</div>
+      <h2>Build it again.<br><span>Bigger this time.</span></h2>
+      <div class="quote" id="quote"></div>
+      <div class="stats">
+        <div class="stat"><b>One</b><small>Team</small></div>
+        <div class="stat"><b>Every</b><small>Order counts</small></div>
+        <div class="stat"><b>Today</b><small>Is day one</small></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="logo"><div class="logo-box">SK</div><b>SK Apps</b></div>
+      <h1>Welcome back</h1>
+      <div class="sub">Sign in with your own username and password</div>
+      <form id="f" autocomplete="on">
+        <div class="field"><label for="u">Username</label><input id="u" autocomplete="username" required></div>
+        <div class="field"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required></div>
+        <button class="btn" id="go" type="submit">Sign In</button>
+        <div class="err" id="err"></div>
+      </form>
+    </div>
   </div>
+  <div class="foot">Every reply, every parcel, every taka moves us forward.</div>
 </div>
 
 <div id="v-apps" class="hidden">
@@ -104,6 +151,44 @@ document.getElementById('f').addEventListener('submit', async function (e) {
   var p = null;
   try { p = await SKAUTH.profile(); } catch (e) {}
   if (p) showApps(p); else { document.getElementById('v-login').classList.remove('hidden'); document.getElementById('u').focus(); }
+})();
+
+(function () {
+  var Q = [
+    'Started with 300 taka. Built a team of fifty. We know the way up.',
+    'Every customer who waits is a sale we can still win. Reply first.',
+    'Small wins every day become the comeback story.',
+    'Discipline is doing the follow-up even when nobody is watching.',
+    'We do not chase luck. We chase the next order, then the next one.',
+    'Falling down was a chapter. Rising again is the book.'
+  ];
+  var el = document.getElementById('quote'), i = Math.floor(Math.random() * Q.length);
+  function show() { el.classList.add('out'); setTimeout(function () { el.textContent = Q[i % Q.length]; i++; el.classList.remove('out'); }, 600); }
+  show(); setInterval(show, 6000);
+
+  var c = document.getElementById('bg'), x = c.getContext('2d'), W, H, P = [], DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function size() { W = c.clientWidth; H = c.clientHeight; c.width = W * DPR; c.height = H * DPR; x.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var n = Math.round(Math.min(90, W * H / 16000)); P = [];
+    for (var k = 0; k < n; k++) P.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .35, vy: (Math.random() - .5) * .35, r: Math.random() * 1.6 + .6 }); }
+  var mx = -999, my = -999;
+  window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+  function tick() {
+    if (document.getElementById('v-login').classList.contains('hidden')) return requestAnimationFrame(tick);
+    x.clearRect(0, 0, W, H);
+    for (var a = 0; a < P.length; a++) {
+      var p = P[a]; p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+      var dm = Math.hypot(p.x - mx, p.y - my); if (dm < 140) { p.x += (p.x - mx) / dm * .6; p.y += (p.y - my) / dm * .6; }
+      x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.283); x.fillStyle = 'rgba(190,205,255,.75)'; x.fill();
+      for (var b = a + 1; b < P.length; b++) {
+        var q = P[b], d = Math.hypot(p.x - q.x, p.y - q.y);
+        if (d < 120) { x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(q.x, q.y); x.strokeStyle = 'rgba(143,162,255,' + (1 - d / 120) * .28 + ')'; x.lineWidth = 1; x.stroke(); }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  size(); window.addEventListener('resize', size);
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
 })();
 </script>
 </body>
