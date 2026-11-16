@@ -1497,20 +1497,27 @@ var currentUser = null;
 
 function authInit() {
   if (authInit._started) return; authInit._started = true;
-  SKAUTH.requireApp('crm').then(function(p) {
-    if (!p) return;
-    currentUser = { username: p.username, role: p.crm_role === 'admin' ? 'admin' : 'moderator', token: p.token };
-    return SKAUTH.team().then(function(rows) {
-      ACCOUNTS = rows.filter(function(r){ return r.crm_role; }).map(function(r){ return { username: r.username, role: r.crm_role }; });
-    }).catch(function(){}).then(function(){
-      document.getElementById('login-overlay').classList.add('hidden');
-      try { applyRole(); } catch(e) { console.error('applyRole error:', e); }
+  SKAUTH.requireGate().then(function(ok) {
+    if (!ok) return;
+    return SKAUTH.crmProfile().then(function(p) {
+      if (p) startSession(p); else showLogin();
     });
   }).catch(function(e){ console.error('authInit error:', e); showLogin(); });
 }
 
+function startSession(p) {
+  currentUser = { username: p.username, role: p.crm_role === 'admin' ? 'admin' : 'moderator', token: p.token };
+  return SKAUTH.crmTeam().then(function(rows) {
+    ACCOUNTS = rows.map(function(r){ return { username: r.username, role: r.crm_role }; });
+  }).catch(function(){}).then(function(){
+    document.getElementById('login-overlay').classList.add('hidden');
+    try { applyRole(); } catch(e) { console.error('applyRole error:', e); }
+  });
+}
+
 function showLogin() {
-  location.replace('/?next=' + encodeURIComponent(location.pathname));
+  document.getElementById('login-overlay').classList.remove('hidden');
+  var u = document.getElementById('login-user'); if (u) setTimeout(function(){ u.focus(); }, 50);
 }
 
 function togglePassView() {
@@ -1525,7 +1532,22 @@ function togglePassView() {
   }
 }
 
-function doLogin() { showLogin(); }
+function doLogin() {
+  var user = (document.getElementById('login-user').value || '').trim();
+  var pass = (document.getElementById('login-pass').value || '');
+  var err = document.getElementById('login-err');
+  if (!user || !pass) return;
+  SKAUTH.crmSignIn(user, pass).then(function(p) {
+    document.getElementById('login-pass').value = '';
+    startSession(p);
+  }).catch(function(e) {
+    err.textContent = /Invalid login/i.test(e.message) ? 'Incorrect username or password.' : e.message;
+    err.classList.add('show');
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+    setTimeout(function() { err.classList.remove('show'); }, 3000);
+  });
+}
 var _savedPage = (function(){ try { return decodeURIComponent((location.hash || '').slice(1)) || localStorage.getItem('sk_page') || ''; } catch (e) { return ''; } })();
 function restoreLastPage(){
   var p = _savedPage; _savedPage = '';
@@ -1591,8 +1613,7 @@ function applyRole() {
 
 function doLogout() {
   localStorage.removeItem('sk_session');
-  currentUser = null;
-  SKAUTH.signOut();
+  SKAUTH.crmSignOut().then(function(){ location.reload(); });
 }
 
 // ── SUPABASE CONFIG ──

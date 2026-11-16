@@ -7,7 +7,7 @@
 <style id="sk-gate">html{visibility:hidden}</style>
 <script src="/assets/supabase.js"></script>
 <script src="/assets/auth.js"></script>
-<script>SKAUTH.requireApp('books').then(function(p){ if(p){ var g=document.getElementById('sk-gate'); if(g) g.remove(); window.SK_USER=p; } });</script>
+<script>SKAUTH.requireGate().then(function(ok){ if(ok){ var g=document.getElementById('sk-gate'); if(g) g.remove(); } });</script>
 <style>
 :root{
   --top:#21263c; --side:#f7f7fc; --side-line:#ebebf3; --text:#21263c; --muted:#6c718a; --line:#ebeaf2;
