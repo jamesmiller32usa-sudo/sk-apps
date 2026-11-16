@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SK Apps</title>
+<script src="/assets/supabase.js"></script>
+<script src="/assets/auth.js"></script>
+<style>
+:root{--top:#21263c;--text:#21263c;--muted:#6c718a;--line:#ebeaf2;--blue:#408dfb;--blue-dark:#2c75e4;--red:#e04b4b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;font-size:13px;color:var(--text);background:#f4f5fa;min-height:100vh}
+.hidden{display:none!important}
+.top{height:50px;background:var(--top);color:#fff;display:flex;align-items:center;padding:0 20px;gap:10px}
+.top .brand{font-size:16px;font-weight:600}
+.top .who{margin-left:auto;font-size:12.5px;color:#c9cde0;display:flex;align-items:center;gap:12px}
+.top button{background:transparent;border:1px solid #3b4258;color:#e6e8f0;border-radius:6px;height:28px;padding:0 10px;cursor:pointer;font:inherit}
+.wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{width:360px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line);border-radius:8px;padding:34px 32px 30px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.logo-box{width:36px;height:36px;background:#ffb6c1;border-radius:6px;display:grid;place-items:center;font-weight:700}
+.logo b{font-size:19px;font-weight:600}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{color:var(--muted);margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{color:#41465d}
+.field input{height:40px;border:1px solid #d9d9e3;border-radius:6px;padding:0 10px;outline:none;font:inherit;font-size:14px}
+.field input:focus{border-color:var(--blue)}
+.btn{width:100%;height:40px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font:inherit;font-size:14px}
+.btn:hover{background:var(--blue-dark)}
+.btn:disabled{opacity:.6;cursor:default}
+.err{color:var(--red);text-align:center;margin-top:10px;min-height:16px}
+.apps{max-width:880px;margin:40px auto;padding:0 20px}
+.apps h2{font-size:20px;font-weight:500;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:20px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:8px;padding:22px;text-decoration:none;color:var(--text);display:flex;gap:14px;align-items:flex-start;transition:border-color .15s,box-shadow .15s}
+.tile:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(64,141,251,.12)}
+.tile .ic{width:44px;height:44px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+.tile .t{font-size:15px;font-weight:600;margin-bottom:4px}
+.tile .d{color:var(--muted);font-size:12.5px;line-height:1.45}
+.empty{color:var(--muted);margin-top:20px}
+</style>
+</head>
+<body>
+
+<div id="v-login" class="wrap hidden">
+  <div class="card">
+    <div class="logo"><div class="logo-box">SK</div><b>SK Apps</b></div>
+    <h1>Sign in</h1>
+    <div class="sub">Use your own username and password</div>
+    <form id="f" autocomplete="on">
+      <div class="field"><label for="u">Username</label><input id="u" autocomplete="username" required></div>
+      <div class="field"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" required></div>
+      <button class="btn" id="go" type="submit">Sign In</button>
+      <div class="err" id="err"></div>
+    </form>
+  </div>
+</div>
+
+<div id="v-apps" class="hidden">
+  <div class="top"><span class="brand">SK Apps</span>
+    <span class="who"><span id="who"></span><button onclick="SK.signOut()">Sign out</button></span></div>
+  <div class="apps">
+    <h2>Your apps</h2>
+    <div class="sub">Open an app. You stay signed in across all of them.</div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<script>
+var APPS = [
+  { key: 'crm', href: '/crm/', name: 'Sharanga CRM', desc: 'Orders, Omnichannel Inbox, sales, manufacturing cost and analytics.', ic: 'SK', bg: '#ffe3ea', fg: '#b4235a' },
+  { key: 'books', href: '/books/', name: 'Books', desc: 'Accounting for Sharanga and Mynflow: banking, bills, sales and reports.', ic: 'B', bg: '#e3ecfd', fg: '#2c75e4' }
+];
+function nextUrl() {
+  var n = new URLSearchParams(location.search).get('next') || '';
+  return /^\/(crm|books)\//.test(n) ? n : '';
+}
+function showApps(p) {
+  var mine = APPS.filter(function (a) { return SK.canUse(p, a.key); });
+  var n = nextUrl();
+  if (n && mine.some(function (a) { return n.indexOf(a.href) === 0; })) { location.replace(n); return; }
+  document.getElementById('who').textContent = (p.display_name || p.username) + (p.crm_role ? ' · ' + p.crm_role : '');
+  document.getElementById('grid').innerHTML = mine.map(function (a) {
+    return '<a class="tile" href="' + a.href + '"><div class="ic" style="background:' + a.bg + ';color:' + a.fg + '">' + a.ic + '</div><div><div class="t">' + a.name + '</div><div class="d">' + a.desc + '</div></div></a>';
+  }).join('') || '<div class="empty">No apps are enabled for your account yet. Ask Rokon.</div>';
+  document.getElementById('v-login').classList.add('hidden');
+  document.getElementById('v-apps').classList.remove('hidden');
+}
+document.getElementById('f').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var btn = document.getElementById('go'), err = document.getElementById('err');
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.textContent = '';
+  try {
+    var p = await SK.signIn(document.getElementById('u').value, document.getElementById('p').value);
+    if (!p) throw new Error('This account is not active.');
+    showApps(p);
+  } catch (x) {
+    err.textContent = /Invalid login/i.test(x.message) ? 'Wrong username or password.' : x.message;
+  }
+  btn.disabled = false; btn.textContent = 'Sign In';
+});
+(async function () {
+  var p = null;
+  try { p = await SK.profile(); } catch (e) {}
+  if (p) showApps(p); else { document.getElementById('v-login').classList.remove('hidden'); document.getElementById('u').focus(); }
+})();
+</script>
+</body>
+</html>
