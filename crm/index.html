@@ -1974,7 +1974,7 @@ var IB = (function(){
   function autoGrow(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 160) + 'px'; }
   function renderHead(c){
     if (!$('ib-head')) return;
-    var asg = '<select class="bs-assign" onchange="IB.assign(this.value)"' + (isAdmin() ? '' : ' disabled') + '><option value="">' + (c.assigned_to ? 'Unassign' : 'Assign this conversation ▾') + '</option>';
+    var asg = '<select class="bs-assign" onchange="IB.assign(this.value)"' + (isAdmin() ? '' : ' disabled') + '><option value="">' + (c.assigned_to ? 'Unassign' : 'Assign this conversation') + '</option>';
     asg += '<option value="AI"' + (c.assigned_to === 'AI' ? ' selected' : '') + '>Assigned to AI</option>';
     users().forEach(function(u){ asg += '<option value="' + esc(u) + '"' + (c.assigned_to === u ? ' selected' : '') + '>Assigned to ' + esc(u) + '</option>'; });
     asg += '</select>';
