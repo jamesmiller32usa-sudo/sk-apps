@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "SK Inbox Pictures",
+  "version": "1.0.0",
+  "description": "Copies customer profile pictures that Business Suite already shows on screen into the Sharangakutir CRM inbox. Read only: never clicks, types or calls Meta.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://*.fbcdn.net/*", "https://dkwlsfzysjdubcwuemvx.supabase.co/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://business.facebook.com/latest/inbox*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }]
+}
