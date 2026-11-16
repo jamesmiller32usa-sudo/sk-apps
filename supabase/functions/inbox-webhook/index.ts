@@ -140,8 +140,21 @@ async function handleRead(platform: string, pageId: string, ev: any) {
   await sb.from("ib_conversations").update({ customer_seen_at: at }).eq("contact_id", contact.id);
 }
 
+async function handleReaction(ev: any) {
+  // Customer reacted (or removed a reaction) on one of the messages in the chat.
+  const r = ev.reaction;
+  if (!r?.mid) return;
+  const { data: m } = await sb.from("ib_messages").select("id, reactions").eq("meta_mid", r.mid).maybeSingle();
+  if (!m) return;
+  const reactions = { ...(m.reactions || {}) };
+  if (r.action === "unreact") delete reactions.customer;
+  else reactions.customer = r.emoji || r.reaction || "❤";
+  await sb.from("ib_messages").update({ reactions }).eq("id", m.id);
+}
+
 async function handleMessage(platform: string, pageId: string, ev: any) {
   if (ev.read) { await handleRead(platform, pageId, ev); return; }
+  if (ev.reaction) { await handleReaction(ev); return; }
   const msg = ev.message;
   if (!msg && ev.referral && ev.sender?.id) {
     const conv = await getConversation(platform, pageId, ev.sender.id);

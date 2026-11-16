@@ -590,6 +590,22 @@ td.r,th.r{text-align:right}
 .rp-tbl td{padding:8px;border-bottom:1px solid #f0f2f5}
 .rp-note{font-size:12px;color:#65676b;margin-top:8px}
 @media (max-width:1250px){.rp-two{grid-template-columns:1fr}.sr-wrap{grid-template-columns:1fr}}
+/* reactions + profile link */
+.bs-bwrap{position:relative;display:flex;flex-direction:column;max-width:62%}
+.bs-row.out .bs-bwrap{align-items:flex-end}
+.bs-bwrap .bs-b{max-width:100%}
+.bs-row.has-rx{margin-bottom:12px}
+.bs-rx{position:absolute;bottom:-12px;right:6px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.25);font-size:13px;line-height:20px;padding:0 5px;white-space:nowrap}
+.bs-row.out .bs-rx{right:auto;left:6px}
+.bs-rxbtn{opacity:0;border:none;background:#f0f2f5;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;color:#65676b;align-self:center}
+.bs-row:hover .bs-rxbtn{opacity:1}
+.bs-rxpop{position:fixed;z-index:6000;background:#fff;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.2);padding:4px 6px;display:flex;gap:2px}
+.bs-rxpop button{border:none;background:transparent;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:transform .1s}
+.bs-rxpop button:hover{transform:scale(1.25)}
+.bs-rxpop button.on{background:#e7f0fd}
+.bs-vp{font-size:12.5px;font-weight:600;color:#0a66d8;text-decoration:none;margin-left:6px}
+.bs-vp2{display:inline-block;font-size:13px;font-weight:600;color:#0a66d8;text-decoration:none;margin:2px 0}
+.bs-vp.off,.bs-vp2.off{color:#8a8d91;font-weight:500;cursor:help}
 /* full screen inbox */
 body.ib-full #page-inbox.active{position:fixed;inset:0;z-index:5000;height:100vh;min-height:0;background:#f0f2f5;padding:8px;margin:0}
 body.ib-full:has(#page-inbox.active){overflow:hidden}
@@ -1974,7 +1990,7 @@ var IB = (function(){
   function cur(){ return S.list.find(function(x){ return x.id === S.sel; }); }
 
   // ── list ──
-  var COLS = 'id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,last_outbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done,follow_up,is_spam,customer_seen_at,st_seen';
+  var COLS = 'id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,last_outbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done,follow_up,is_spam,customer_seen_at,st_seen,fb_uid';
   S.flt = ''; S.ch = '';
   function flt(b){
     var k = b.dataset.f; S.flt = S.flt === k ? '' : k;
@@ -2131,7 +2147,7 @@ var IB = (function(){
     S.stages.forEach(function(s){ st += '<option value="' + s.key + '"' + (s.key === c.stage_key ? ' selected' : '') + '>' + esc(s.name) + '</option>'; });
     st += '</select>';
     $('ib-head').innerHTML = ava(c.name, c.profile_pic, 40) +
-      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + ' <span class="bs-hpage">' + pageLogo(c.page_id, 20) + ' ' + esc(pageName(c.page_id)) + '</span></div>' + asg + '</div>' +
+      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + ' <span class="bs-hpage">' + pageLogo(c.page_id, 20) + ' ' + esc(pageName(c.page_id)) + '</span></div>' + asg + ' ' + profileLink(c, 'bs-vp') + '</div>' +
       '<div class="bs-icons">' + st +
         '<button class="bs-ibtn" title="' + (c.is_spam ? 'Not spam' : 'Move to spam') + '" onclick="IB.spam()">' + ICON.spam + '</button>' +
         '<button class="bs-ibtn" title="Delete conversation" onclick="IB.del()">' + ICON.trash + '</button>' +
@@ -2151,7 +2167,7 @@ var IB = (function(){
   function hideAd(){ S.adHidden = true; $('ib-adbar').innerHTML = ''; }
   function loadMsgs(keepScroll){
     var id = S.sel; if (!id) return;
-    return q('ib_messages?select=id,direction,sender_type,sent_by,text,attachments,sent_at,send_status,send_error&conversation_id=eq.' + id + '&order=sent_at.desc&limit=300').then(function(rows){
+    return q('ib_messages?select=id,direction,sender_type,sent_by,text,attachments,sent_at,send_status,send_error,reactions,meta_mid&conversation_id=eq.' + id + '&order=sent_at.desc&limit=300').then(function(rows){
       if (S.sel !== id) return;
       var pend = S.msgs.filter(function(m){ return m._local; });
       S.msgs = (rows || []).reverse();
@@ -2182,6 +2198,7 @@ var IB = (function(){
       });
       if (m.text) items.push({ m: m, dir: dir, html: linkify(m.text), big: isBigEmoji(m.text) });
     });
+    for (var k = 0; k < items.length; k++) items[k].lastOfMsg = !items[k + 1] || items[k + 1].m !== items[k].m;
     var h = '', prevT = 0;
     for (var i = 0; i < items.length; i++) {
       var it = items[i], m = it.m, t = new Date(m.sent_at).getTime();
@@ -2194,7 +2211,13 @@ var IB = (function(){
       var cls = 'bs-b' + (it.media ? ' media' : '') + (it.big ? ' big' : '');
       var tip = esc(sepTime(m.sent_at));
       var left = it.dir === 'in' ? (joinNext ? '<span class="sp"></span>' : '<span class="sp">' + ava(c.name, c.profile_pic, 28) + '</span>') : '';
-      h += '<div class="bs-row ' + it.dir + (pos ? ' ' + pos : '') + st + '">' + left + '<div class="' + cls + '" title="' + tip + '">' + it.html + '</div></div>';
+      var rx = m.reactions || {};
+      var rxHtml = '';
+      if (it.lastOfMsg && (rx.customer || rx.page)) {
+        rxHtml = '<span class="bs-rx" title="' + esc((rx.customer ? 'Customer reacted ' + rx.customer : '') + (rx.page ? (rx.customer ? ' · ' : '') + 'Page reacted' + (rx.page_by ? ' (' + rx.page_by + ')' : '') : '')) + '">' + (rx.customer ? esc(rx.customer) : '') + (rx.page ? esc(RX[rx.page] || rx.page) : '') + '</span>';
+      }
+      var reactBtn = (it.dir === 'in' && it.lastOfMsg && m.meta_mid) ? '<button class="bs-rxbtn" title="React" onclick="IB.rxPick(event,\'' + m.id + '\')">☺</button>' : '';
+      h += '<div class="bs-row ' + it.dir + (pos ? ' ' + pos : '') + st + (rxHtml ? ' has-rx' : '') + '">' + left + '<div class="bs-bwrap"><div class="' + cls + '" title="' + tip + '">' + it.html + '</div>' + rxHtml + '</div>' + reactBtn + '</div>';
       if (it.dir === 'out' && !joinNext) {
         if (m.send_status === 'failed') h += '<div class="bs-err">Not sent: ' + esc(m.send_error || 'unknown error') + '</div>';
         else if (m.send_status === 'pending') h += '<div class="bs-sent">Sending…</div>';
@@ -2208,6 +2231,33 @@ var IB = (function(){
     box.innerHTML = h || '<div class="ib-empty">No messages stored for this chat yet</div>';
     if (!keepScroll || atBottom) box.scrollTop = box.scrollHeight;
     box.querySelectorAll('img').forEach(function(img){ img.addEventListener('load', function(){ if (!keepScroll || atBottom) box.scrollTop = box.scrollHeight; }, { once: true }); });
+  }
+  var RX = { love: '❤️', smile: '😆', wow: '😮', sad: '😢', angry: '😠', like: '👍' };
+  function rxPick(ev, id){
+    ev.stopPropagation();
+    var old = document.getElementById('ib-rxpop'); if (old) old.remove();
+    var m = S.msgs.find(function(x){ return x.id === id; }) || {};
+    var cur = (m.reactions || {}).page;
+    var el = document.createElement('div'); el.id = 'ib-rxpop'; el.className = 'bs-rxpop';
+    el.innerHTML = Object.keys(RX).map(function(k){ return '<button class="' + (k === cur ? 'on' : '') + '" title="' + k + '" onclick="IB.react(\'' + id + '\',\'' + (k === cur ? '' : k) + '\')">' + RX[k] + '</button>'; }).join('');
+    var r = ev.currentTarget.getBoundingClientRect();
+    el.style.left = Math.max(8, r.left - 20) + 'px'; el.style.top = (r.top - 52) + 'px';
+    document.body.appendChild(el);
+    setTimeout(function(){ document.addEventListener('mousedown', function h(e){ if (!el.contains(e.target)) { el.remove(); document.removeEventListener('mousedown', h); } }); }, 0);
+  }
+  function react(id, k){
+    var el = document.getElementById('ib-rxpop'); if (el) el.remove();
+    var m = S.msgs.find(function(x){ return x.id === id; }); if (!m) return;
+    var before = Object.assign({}, m.reactions || {});
+    m.reactions = Object.assign({}, before); if (k) m.reactions.page = k; else delete m.reactions.page;
+    renderMsgs(true);
+    fn('inbox-send', { react: { message_id: id, reaction: k }, username: me() }).then(function(r){
+      if (!r || !r.ok) { m.reactions = before; renderMsgs(true); alertBox('Reaction not sent: ' + ((r && r.error) || 'unknown error')); }
+    });
+  }
+  function profileLink(c, cls){
+    return c.fb_uid ? '<a class="' + cls + '" href="https://www.facebook.com/' + esc(c.fb_uid) + '" target="_blank" rel="noopener">View profile</a>'
+      : '<span class="' + cls + ' off" title="The link appears once this customer has been shown in Business Suite with the SK Inbox Pictures extension">Profile link pending</span>';
   }
   function pushLocal(m){ m._local = true; m.direction = 'out'; m.sender_type = 'moderator'; m.sent_by = me(); m.sent_at = new Date().toISOString(); m.send_status = 'pending'; S.msgs.push(m); renderMsgs(false); }
   function afterSend(r){
@@ -2453,7 +2503,7 @@ var IB = (function(){
     S.stages.forEach(function(x){ st += '<option value="' + x.key + '"' + (x.key === c.stage_key ? ' selected' : '') + '>' + esc(x.name) + '</option>'; });
     st += '</select>';
     var h = '<div class="bs-prof">' + ava(c.name, c.profile_pic, 56, c.platform) +
-      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div><div class="sub">' + pageLogo(c.page_id, 18) + ' ' + esc(pageName(c.page_id)) + ' · ' + (c.platform === 'instagram' ? 'Instagram' : 'Messenger') + '</div></div></div>' +
+      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div>' + profileLink(c, 'bs-vp2') + '<div class="sub">' + pageLogo(c.page_id, 18) + ' ' + esc(pageName(c.page_id)) + ' · ' + (c.platform === 'instagram' ? 'Instagram' : 'Messenger') + '</div></div></div>' +
       '<div class="bs-sec"><h4>Stage</h4><div class="help">' + esc(c.ai_summary || (s && s.description) || '') + '</div>' + st +
         kv('In this stage', c.mins_in_stage != null ? dur(c.mins_in_stage) : '-') +
         kv('Time limit', s && s.sla_minutes ? dur(s.sla_minutes) : '-') +
@@ -2661,7 +2711,7 @@ var IB = (function(){
     show: show, view: view, tab: tab, setPage: setPage, load: load, debounceLoad: debounceLoad, open: open, send: send, useTpl: useTpl,
     setStage: setStage, assign: assign, remLoad: remLoad, remPick: remPick, remAll: remAll, remFirst: remFirst, remTpl: remTpl,
     remSend: remSend, jump: jump, comLoad: comLoad, comDone: comDone, saveStages: saveStages, addTpl: addTpl, delTpl: delTpl, saveTpls: saveTpls,
-    flt: flt, fsel: fsel, full: full, star: star, spam: spam, del: del, clearPending: clearPending,
+    flt: flt, fsel: fsel, full: full, star: star, rxPick: rxPick, react: react, spam: spam, del: del, clearPending: clearPending,
     srRender: srRender, srOpen: srOpen, srNew: srNew, srSave: srSave, srDel: srDel, srImg: srImg, srUpload: srUpload,
     repRange: repRange, repGo: repGo, repStage: repStage, pickFile: pickFile, pop: pop, srFilter: srFilter, useSaved: useSaved, addEmoji: addEmoji, hideAd: hideAd, done: done, unread: unread
   };

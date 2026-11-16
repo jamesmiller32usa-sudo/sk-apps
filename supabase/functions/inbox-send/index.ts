@@ -117,6 +117,25 @@ Deno.serve(async (req) => {
     return json({ batch_id: batch!.id, sent, failed, results });
   }
 
+  if (body.react) {
+    // React to a customer message from the Page: { react: { message_id (our id), reaction: love|smile|wow|sad|angry|like|"" } }
+    const { data: m } = await sb.from("ib_messages").select("id, meta_mid, reactions, conversation_id").eq("id", body.react.message_id).maybeSingle();
+    if (!m?.meta_mid) return json({ ok: false, error: "message_not_found" }, 422);
+    const { data: conv } = await sb.from("ib_conversations").select("page_id, ib_contacts(external_id)").eq("id", m.conversation_id).maybeSingle();
+    const token = conv && await pageToken(conv.page_id);
+    if (!token) return json({ ok: false, error: "no_page_token" }, 422);
+    const reaction = String(body.react.reaction || "");
+    const payload = reaction
+      ? { recipient: { id: (conv as any).ib_contacts.external_id }, sender_action: "react", payload: { message_id: m.meta_mid, reaction } }
+      : { recipient: { id: (conv as any).ib_contacts.external_id }, sender_action: "unreact", payload: { message_id: m.meta_mid } };
+    const j = await (await fetch(`${GRAPH}/${conv!.page_id}/messages?access_token=${token}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })).json();
+    if (j.error) return json({ ok: false, error: j.error.message }, 422);
+    const reactions = { ...(m.reactions || {}) };
+    if (reaction) { reactions.page = reaction; reactions.page_by = username; } else { delete reactions.page; delete reactions.page_by; }
+    await sb.from("ib_messages").update({ reactions }).eq("id", m.id);
+    return json({ ok: true });
+  }
+
   const text = String(body.text || "").trim();
   const att = body.attachment_url ? { type: ["image", "video", "audio", "file"].includes(body.attachment_type) ? body.attachment_type : "file", url: String(body.attachment_url) } : null;
   if (!body.conversation_id || (!text && !att)) return json({ error: "conversation_id and text or attachment required" }, 400);

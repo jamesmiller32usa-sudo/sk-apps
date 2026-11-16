@@ -5,11 +5,11 @@ const queue = [];
 let busy = false;
 
 async function done(name) {
-  const k = "d:" + name;
+  const k = "d2:" + name;
   const r = await chrome.storage.local.get(k);
   return r[k] && Date.now() - r[k] < 7 * 864e5;
 }
-async function mark(name) { await chrome.storage.local.set({ ["d:" + name]: Date.now() }); }
+async function mark(name) { await chrome.storage.local.set({ ["d2:" + name]: Date.now() }); }
 async function call(body) {
   const r = await fetch(SUPA, { method: "POST", headers: { "Content-Type": "application/json", apikey: KEY, Authorization: "Bearer " + KEY }, body: JSON.stringify(body) });
   return r.json();
@@ -23,18 +23,23 @@ async function work() {
   if (busy) return; busy = true;
   while (queue.length) {
     const it = queue.shift();
+    const key = it.name + "|" + (it.fb_uid || "");
     try {
-      if (await done(it.name)) continue;
-      const chk = await call({ name: it.name, page_id: it.page_id, check: true });
-      if (!chk.need) { await mark(it.name); continue; }
-      const res = await fetch(it.src);
-      if (!res.ok) continue;
-      const type = res.headers.get("content-type") || "image/jpeg";
-      const b64 = toB64(await res.arrayBuffer());
-      const out = await call({ name: it.name, page_id: it.page_id, image: b64, type });
-      if (out.status === "saved" || out.status === "exists" || out.status === "ambiguous" || out.status === "unknown") await mark(it.name);
+      if (await done(key)) continue;
+      const base = { name: it.name, page_id: it.page_id, fb_uid: it.fb_uid || null, preview: it.preview || "" };
+      const chk = await call({ ...base, check: true });
+      if (!chk.need) { if (chk.reason !== "unknown") await mark(key); continue; }
+      const body = { ...base };
+      if (chk.needImage) {
+        const res = await fetch(it.src);
+        if (!res.ok) continue;
+        body.type = res.headers.get("content-type") || "image/jpeg";
+        body.image = toB64(await res.arrayBuffer());
+      }
+      const out = await call(body);
+      if (out.status === "saved" || out.status === "exists" || out.status === "ambiguous") await mark(key);
     } catch (e) { /* try again next time it is on screen */ }
-    await new Promise((r) => setTimeout(r, 700));
+    await new Promise((r) => setTimeout(r, 600));
   }
   busy = false;
 }
@@ -43,5 +48,5 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     call({ missing: true, page_id: msg.page_id || null }).then(reply).catch(() => reply({ names: [] }));
     return true;
   }
-  if (msg && msg.type === "avatars") { for (const it of msg.items) if (!queue.some((q) => q.name === it.name)) queue.push(it); work(); }
+  if (msg && msg.type === "avatars") { for (const it of msg.items) if (!queue.some((q) => q.name === it.name && q.fb_uid === it.fb_uid)) queue.push(it); work(); }
 });

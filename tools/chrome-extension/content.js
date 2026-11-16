@@ -22,6 +22,19 @@
   function pageId() {
     try { return new URL(location.href).searchParams.get("asset_id") || ""; } catch (e) { return ""; }
   }
+  function rowOf(img) {
+    return img.closest("[data-maiba-contact-id]");
+  }
+  function previewFor(img) {
+    let el = img;
+    for (let i = 0; i < 9 && el; i++) {
+      el = el.parentElement;
+      if (!el) break;
+      const lines = (el.innerText || "").trim().split("\n").map((x) => x.trim()).filter(Boolean);
+      if (lines.length >= 2 && !bad.test(lines[0])) return lines.slice(1).find((l) => !bad.test(l)) || "";
+    }
+    return "";
+  }
   function avatars() {
     return [...document.querySelectorAll("img")].filter((img) => img.width >= 24 && img.width <= 72 && isCdn(img.src));
   }
@@ -32,9 +45,12 @@
       const name = nameFor(img);
       if (!name) return;
       seenNames.add(name);
-      if (sent.has(name)) return;
-      sent.add(name);
-      out.push({ name, src: img.currentSrc || img.src, page_id: pageId() });
+      const row = rowOf(img);
+      const fb = row ? row.getAttribute("data-maiba-contact-id") : "";
+      const key = name + "|" + (fb || "");
+      if (sent.has(key)) return;
+      sent.add(key);
+      out.push({ name, src: img.currentSrc || img.src, page_id: pageId(), fb_uid: fb || "", preview: previewFor(img).slice(0, 80) });
     });
     if (out.length) chrome.runtime.sendMessage({ type: "avatars", items: out });
   }
