@@ -526,7 +526,9 @@ td.r,th.r{text-align:right}
 .bs-item:hover .bs-fstar{display:block;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .bs-fstar.on{display:block;color:#fff;background:#f7a325!important}
 .bs-plogo{width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid #e4e6eb;vertical-align:middle}
-.bs-tag.pg{padding:0 6px 0 2px;background:#fff}
+.bs-tag.pg{padding:1px 7px 1px 2px;background:#fff;font-weight:600}
+.bs-hpage{display:inline-flex;align-items:center;gap:5px;margin-left:8px;font-size:12.5px;font-weight:600;color:#65676b;background:#f0f2f5;border-radius:12px;padding:2px 9px 2px 3px;vertical-align:middle}
+.bs-prof .sub{display:flex;align-items:center;gap:5px}
 .bs-ibtn.star.on{background:#f7a325;border-color:#f7a325;color:#fff}
 .bs-pend{display:flex;align-items:center;gap:8px;margin:0 0 6px 38px}
 .bs-pend img{width:56px;height:56px;border-radius:8px;object-fit:cover;border:1px solid #e4e6eb}
@@ -2044,7 +2046,7 @@ var IB = (function(){
     S.list.forEach(function(c){
       var un = c.unread_count > 0;
       var tags = stageTag(c) +
-        '<span class="bs-tag pg">' + pageLogo(c.page_id, 18) + ' ' + esc(pageCode(c.page_id)) + '</span>' +
+        '<span class="bs-tag pg">' + pageLogo(c.page_id, 20) + ' ' + esc(pageCode(c.page_id)) + '</span>' +
         (c.st_seen ? '<span class="bs-tag" title="Customer saw our last message">Seen</span>' : '') +
         (c.source_ad_id ? '<span class="bs-tag ad">' + ADI + 'ad_id.' + esc(String(c.source_ad_id).slice(-4)) + '</span>' : '') +
         (c.assigned_to ? '<span class="bs-tag who">' + esc(c.assigned_to) + '</span>' : '');
@@ -2117,7 +2119,7 @@ var IB = (function(){
     box.addEventListener('dragleave', function(){ $('ib-cbox').classList.remove('bs-drop'); });
     box.addEventListener('drop', function(e){ e.preventDefault(); $('ib-cbox').classList.remove('bs-drop'); var f = e.dataTransfer.files[0]; if (f) upload(f); });
   }
-  function pageAva(pid){ var p = S.pages.find(function(x){ return x.page_id === pid; }) || {}; return ava(p.name || 'Page', null, 28); }
+  function pageAva(pid){ return pageLogo(pid, 28); }
   function autoGrow(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 160) + 'px'; }
   function renderHead(c){
     if (!$('ib-head')) return;
@@ -2129,7 +2131,7 @@ var IB = (function(){
     S.stages.forEach(function(s){ st += '<option value="' + s.key + '"' + (s.key === c.stage_key ? ' selected' : '') + '>' + esc(s.name) + '</option>'; });
     st += '</select>';
     $('ib-head').innerHTML = ava(c.name, c.profile_pic, 40) +
-      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div>' + asg + '</div>' +
+      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + ' <span class="bs-hpage">' + pageLogo(c.page_id, 20) + ' ' + esc(pageName(c.page_id)) + '</span></div>' + asg + '</div>' +
       '<div class="bs-icons">' + st +
         '<button class="bs-ibtn" title="' + (c.is_spam ? 'Not spam' : 'Move to spam') + '" onclick="IB.spam()">' + ICON.spam + '</button>' +
         '<button class="bs-ibtn" title="Delete conversation" onclick="IB.del()">' + ICON.trash + '</button>' +
@@ -2451,7 +2453,7 @@ var IB = (function(){
     S.stages.forEach(function(x){ st += '<option value="' + x.key + '"' + (x.key === c.stage_key ? ' selected' : '') + '>' + esc(x.name) + '</option>'; });
     st += '</select>';
     var h = '<div class="bs-prof">' + ava(c.name, c.profile_pic, 56, c.platform) +
-      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div><div class="sub">' + esc(pageName(c.page_id)) + ' · ' + (c.platform === 'instagram' ? 'Instagram' : 'Messenger') + '</div></div></div>' +
+      '<div style="min-width:0"><div class="nm">' + esc(c.name || 'Facebook user') + '</div><div class="sub">' + pageLogo(c.page_id, 18) + ' ' + esc(pageName(c.page_id)) + ' · ' + (c.platform === 'instagram' ? 'Instagram' : 'Messenger') + '</div></div></div>' +
       '<div class="bs-sec"><h4>Stage</h4><div class="help">' + esc(c.ai_summary || (s && s.description) || '') + '</div>' + st +
         kv('In this stage', c.mins_in_stage != null ? dur(c.mins_in_stage) : '-') +
         kv('Time limit', s && s.sla_minutes ? dur(s.sla_minutes) : '-') +
