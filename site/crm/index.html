@@ -389,7 +389,9 @@ td.r,th.r{text-align:right}
 /* list column */
 .bs-lhead{padding:12px 12px 8px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #e4e6eb}
 .bs-srow{display:flex;gap:8px}
-.bs-search{flex:1;display:flex;align-items:center;gap:8px;border:1px solid #ced0d4;border-radius:6px;padding:0 10px;height:36px}
+.bs-search{flex:1;display:flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:20px;padding:0 12px;height:36px;background:#f0f2f5;box-sizing:border-box}
+.bs-search:focus-within{background:#fff;border-color:#0a66d8}
+.bs-lhead .bs-search{flex:0 0 36px;width:100%}
 .bs-search input{border:none;outline:none;flex:1;font:inherit;font-size:14px;min-width:0;background:transparent}
 .bs-sel{height:36px;border:1px solid #ced0d4;border-radius:6px;padding:0 8px;font:inherit;font-size:13px;font-weight:600;background:#fff;color:#1c2b33;cursor:pointer;max-width:150px}
 .bs-fchips{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
@@ -515,7 +517,7 @@ td.r,th.r{text-align:right}
 .bs-topsel{height:32px;border:1px solid #ced0d4;border-radius:6px;padding:0 8px;font:inherit;font-size:13px;font-weight:700;color:#1c2b33;background:#fff;cursor:pointer;margin-left:6px;max-width:170px}
 .bs-top2{display:flex;align-items:center;gap:6px;padding:6px 12px;border-bottom:1px solid #e4e6eb;background:#fafbfc}
 .bs-top2 .sp{flex:1}
-.bs-state{display:flex;flex-wrap:wrap;gap:4px}.bs-state button{flex:1 1 auto}
+.bs-state{display:flex;flex-wrap:wrap;gap:4px}.bs-state button{flex:1 1 auto}.bs-state button[data-f=follow]{flex:0 0 auto;padding:6px 8px}
 .bs-state button{border:1px solid #e4e6eb;background:#fff;border-radius:6px;padding:6px 3px;font:inherit;font-size:12px;overflow:hidden;text-overflow:ellipsis;font-weight:700;color:#1c2b33;cursor:pointer;white-space:nowrap}
 .bs-state button b{display:inline-block;min-width:16px;padding:0 4px;border-radius:9px;background:#f0f2f5;color:#1c2b33;font-size:11.5px;line-height:18px;text-align:center;margin-left:2px}
 .bs-state button.on{background:#e7f0fd;border-color:#a9c8f5;color:#0a66d8}
@@ -2250,7 +2252,7 @@ var IB = (function(){
     var m = S.msgs.find(function(x){ return x.id === id; }); if (!m) return;
     var before = Object.assign({}, m.reactions || {});
     var emo = k ? RX[k] : '';
-    m.reactions = Object.assign({}, before); if (emo) m.reactions.page = emo; else delete m.reactions.page;
+    m._rxAt = Date.now(); m.reactions = Object.assign({}, before); if (emo) m.reactions.page = emo; else delete m.reactions.page;
     renderMsgs(true);
     fn('inbox-send', { react: { message_id: id, reaction: emo }, username: me() }).then(function(r){
       if (!r || !r.ok) { m.reactions = before; renderMsgs(true); alertBox('Reaction not sent: ' + ((r && r.error) || 'unknown error')); }
@@ -2700,8 +2702,25 @@ var IB = (function(){
   function tick(){
     var pg = document.getElementById('page-inbox');
     if (!pg || !pg.classList.contains('active') || document.hidden) return;
-    if (S.v === 'chats') load(true);
+    if (S.v === 'chats') { load(true); rxSync(); }
     if (++_tk % 2 === 1) counts();
+  }
+  // reactions do not change the conversation row, so check the open chat's reactions on every tick
+  var _rxBusy = false;
+  function rxSync(){
+    var id = S.sel; if (!id || _rxBusy || !S.msgs.length) return;
+    _rxBusy = true;
+    q('ib_messages?select=id,reactions&conversation_id=eq.' + id + '&order=sent_at.desc&limit=300').then(function(rows){
+      _rxBusy = false;
+      if (S.sel !== id || !Array.isArray(rows)) return;
+      var map = {}; rows.forEach(function(r){ map[r.id] = r.reactions || {}; });
+      var changed = false;
+      S.msgs.forEach(function(m){
+        if (m._local || !(m.id in map) || (m._rxAt && Date.now() - m._rxAt < 10000)) return;
+        if (JSON.stringify(m.reactions || {}) !== JSON.stringify(map[m.id])) { m.reactions = map[m.id]; changed = true; }
+      });
+      if (changed) renderMsgs(true);
+    }).catch(function(){ _rxBusy = false; });
   }
   function show(){
     boot().then(function(){ view(S.v); counts(); });
