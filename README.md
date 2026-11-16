@@ -23,4 +23,4 @@ One site for the Sharanga team apps. Hosted free on Cloudflare Pages; every push
 - `supabase/sql/` - database schema for the `ib_` tables.
 - `tools/chrome-extension/` - "SK Inbox Pictures" extension. Load it unpacked in Chrome; it copies customer profile pictures that Business Suite already shows on screen into the inbox.
 
-`_redirects` returns 404 for these folders so they are never published on the site. Secrets (Meta app secret, page tokens, service role key) live only in Supabase and are never committed.
+Cloudflare Pages publishes only the `site/` folder (build output directory), so these folders are never on the website. Secrets (Meta app secret, page tokens, service role key) live only in Supabase and are never committed.
