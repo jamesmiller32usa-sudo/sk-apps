@@ -18,6 +18,16 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
   const body = await req.json().catch(() => ({}));
+  // Catch-up list: recent customers that still have no saved picture.
+  if (body.missing) {
+    const since = new Date(Date.now() - 7 * 864e5).toISOString();
+    let q = sb.from("ib_conv_view").select("name, page_id, profile_pic").gte("last_message_at", since).not("name", "is", null)
+      .order("last_message_at", { ascending: false }).limit(400);
+    if (body.page_id) q = q.eq("page_id", String(body.page_id));
+    const { data } = await q;
+    const names = (data || []).filter((r: any) => !(r.profile_pic && String(r.profile_pic).includes("/inbox-media/avatars/"))).map((r: any) => r.name);
+    return json({ names: [...new Set(names)].slice(0, 200) });
+  }
   const name = String(body.name || "").trim();
   const pageId = body.page_id ? String(body.page_id) : null;
 

@@ -38,6 +38,10 @@ async function work() {
   }
   busy = false;
 }
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg && msg.type === "missing") {
+    call({ missing: true, page_id: msg.page_id || null }).then(reply).catch(() => reply({ names: [] }));
+    return true;
+  }
   if (msg && msg.type === "avatars") { for (const it of msg.items) if (!queue.some((q) => q.name === it.name)) queue.push(it); work(); }
 });

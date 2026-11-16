@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SK Inbox Pictures",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Copies customer profile pictures that Business Suite already shows on screen into the Sharangakutir CRM inbox. Read only: never clicks, types or calls Meta.",
   "permissions": ["storage"],
   "host_permissions": ["https://*.fbcdn.net/*", "https://dkwlsfzysjdubcwuemvx.supabase.co/*"],
