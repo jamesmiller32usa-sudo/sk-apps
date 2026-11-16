@@ -2239,7 +2239,7 @@ var IB = (function(){
     var m = S.msgs.find(function(x){ return x.id === id; }) || {};
     var cur = (m.reactions || {}).page;
     var el = document.createElement('div'); el.id = 'ib-rxpop'; el.className = 'bs-rxpop';
-    el.innerHTML = Object.keys(RX).map(function(k){ return '<button class="' + (k === cur ? 'on' : '') + '" title="' + k + '" onclick="IB.react(\'' + id + '\',\'' + (k === cur ? '' : k) + '\')">' + RX[k] + '</button>'; }).join('');
+    el.innerHTML = Object.keys(RX).map(function(k){ var on = RX[k] === cur || k === cur; return '<button class="' + (on ? 'on' : '') + '" title="' + k + '" onclick="IB.react(\'' + id + '\',\'' + (on ? '' : k) + '\')">' + RX[k] + '</button>'; }).join('');
     var r = ev.currentTarget.getBoundingClientRect();
     el.style.left = Math.max(8, r.left - 20) + 'px'; el.style.top = (r.top - 52) + 'px';
     document.body.appendChild(el);
@@ -2249,9 +2249,10 @@ var IB = (function(){
     var el = document.getElementById('ib-rxpop'); if (el) el.remove();
     var m = S.msgs.find(function(x){ return x.id === id; }); if (!m) return;
     var before = Object.assign({}, m.reactions || {});
-    m.reactions = Object.assign({}, before); if (k) m.reactions.page = k; else delete m.reactions.page;
+    var emo = k ? RX[k] : '';
+    m.reactions = Object.assign({}, before); if (emo) m.reactions.page = emo; else delete m.reactions.page;
     renderMsgs(true);
-    fn('inbox-send', { react: { message_id: id, reaction: k }, username: me() }).then(function(r){
+    fn('inbox-send', { react: { message_id: id, reaction: emo }, username: me() }).then(function(r){
       if (!r || !r.ok) { m.reactions = before; renderMsgs(true); alertBox('Reaction not sent: ' + ((r && r.error) || 'unknown error')); }
     });
   }
