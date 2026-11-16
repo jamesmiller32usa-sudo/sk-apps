@@ -55,5 +55,5 @@
     return r.data || [];
   }
 
-  window.SK = { sb: sb, profile: profile, canUse: canUse, requireApp: requireApp, signIn: signIn, signOut: signOut, team: team, SUPA_URL: SUPA_URL };
+  window.SKAUTH = { sb: sb, profile: profile, canUse: canUse, requireApp: requireApp, signIn: signIn, signOut: signOut, team: team, SUPA_URL: SUPA_URL };
 })();

@@ -1497,10 +1497,10 @@ var currentUser = null;
 
 function authInit() {
   if (authInit._started) return; authInit._started = true;
-  SK.requireApp('crm').then(function(p) {
+  SKAUTH.requireApp('crm').then(function(p) {
     if (!p) return;
     currentUser = { username: p.username, role: p.crm_role === 'admin' ? 'admin' : 'moderator', token: p.token };
-    return SK.team().then(function(rows) {
+    return SKAUTH.team().then(function(rows) {
       ACCOUNTS = rows.filter(function(r){ return r.crm_role; }).map(function(r){ return { username: r.username, role: r.crm_role }; });
     }).catch(function(){}).then(function(){
       document.getElementById('login-overlay').classList.add('hidden');
@@ -1592,7 +1592,7 @@ function applyRole() {
 function doLogout() {
   localStorage.removeItem('sk_session');
   currentUser = null;
-  SK.signOut();
+  SKAUTH.signOut();
 }
 
 // ── SUPABASE CONFIG ──

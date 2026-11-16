@@ -59,7 +59,7 @@ h1{font-size:22px;font-weight:500;margin-bottom:4px}
 
 <div id="v-apps" class="hidden">
   <div class="top"><span class="brand">SK Apps</span>
-    <span class="who"><span id="who"></span><button onclick="SK.signOut()">Sign out</button></span></div>
+    <span class="who"><span id="who"></span><button onclick="SKAUTH.signOut()">Sign out</button></span></div>
   <div class="apps">
     <h2>Your apps</h2>
     <div class="sub">Open an app. You stay signed in across all of them.</div>
@@ -77,7 +77,7 @@ function nextUrl() {
   return /^\/(crm|books)\//.test(n) ? n : '';
 }
 function showApps(p) {
-  var mine = APPS.filter(function (a) { return SK.canUse(p, a.key); });
+  var mine = APPS.filter(function (a) { return SKAUTH.canUse(p, a.key); });
   var n = nextUrl();
   if (n && mine.some(function (a) { return n.indexOf(a.href) === 0; })) { location.replace(n); return; }
   document.getElementById('who').textContent = (p.display_name || p.username) + (p.crm_role ? ' · ' + p.crm_role : '');
@@ -92,7 +92,7 @@ document.getElementById('f').addEventListener('submit', async function (e) {
   var btn = document.getElementById('go'), err = document.getElementById('err');
   btn.disabled = true; btn.textContent = 'Signing in…'; err.textContent = '';
   try {
-    var p = await SK.signIn(document.getElementById('u').value, document.getElementById('p').value);
+    var p = await SKAUTH.signIn(document.getElementById('u').value, document.getElementById('p').value);
     if (!p) throw new Error('This account is not active.');
     showApps(p);
   } catch (x) {
@@ -102,7 +102,7 @@ document.getElementById('f').addEventListener('submit', async function (e) {
 });
 (async function () {
   var p = null;
-  try { p = await SK.profile(); } catch (e) {}
+  try { p = await SKAUTH.profile(); } catch (e) {}
   if (p) showApps(p); else { document.getElementById('v-login').classList.remove('hidden'); document.getElementById('u').focus(); }
 })();
 </script>
