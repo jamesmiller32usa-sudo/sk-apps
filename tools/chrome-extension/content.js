@@ -80,7 +80,7 @@
   function ask(msg) { return new Promise((res) => chrome.runtime.sendMessage(msg, (r) => res(r || {}))); }
 
   async function catchUp() {
-    const ck = "catchup_at" + (robot ? "_" + pageId() : "");
+    const ck = "catchup_at_" + pageId(); // each page keeps its own timer, so all three tabs catch up
     const last = (await chrome.storage.local.get(ck))[ck] || 0;
     if (Date.now() - last < (robot ? 10 : 30) * 60 * 1000) return; // humans: every 30 min; robot: every 10 min per page
     const r = await ask({ type: "missing", page_id: pageId() });
@@ -90,7 +90,7 @@
     const box = listBox();
     if (!box) return;
     let steps = 0, stuck = 0, prevH = 0;
-    while (need.length && steps < 60) {
+    while (need.length && steps < 150) {
       if (document.visibilityState !== "visible") { await sleep(3000); continue; }
       if (!robot && Date.now() - userBusy < 15000) return; // the person is using the inbox: stop and leave the list where they put it
       const before = box.scrollTop;
