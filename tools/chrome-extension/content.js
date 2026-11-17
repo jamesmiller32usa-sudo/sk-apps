@@ -85,14 +85,15 @@
       const first = ((row.innerText || "").trim().split("\n")[0] || "").trim().toLowerCase();
       const img = row.querySelector("img");
       const uid = row.getAttribute("data-maiba-contact-id");
-      if (first === want && img && isCdn(img.src) && /^\d{6,20}$/.test(uid || "")) out.set(uid, { uid, pic: img.currentSrc || img.src, username: "" });
+      // the picture may still be loading while the list scrolls; the Facebook id is enough to match
+      if (first === want && /^\d{6,20}$/.test(uid || "")) out.set(uid, { uid, pic: img && isCdn(img.src) ? (img.currentSrc || img.src) : "", username: "", row });
     });
     return [...out.values()];
   }
   async function handleRequest(q) {
     // 1. already on screen: instant
     let list = rowsNamed(q.name);
-    if (list.length) return list;
+    if (list.length) return list.map((x) => ({ uid: x.uid, pic: x.pic, username: "" }));
     // 2. inbox search: works however far down the chat is, if only one person has this name
     const found = await findInPage(q.name, q.id);
     if (found.length === 1) return found;
@@ -109,8 +110,15 @@
       if (box.scrollTop === before && box.scrollHeight === prevH) { if (++stuck >= 8) break; box.scrollBy({ top: -150 }); await sleep(600); } else stuck = 0;
       prevH = box.scrollHeight;
     }
+    if (list.length) {
+      // give the found rows a moment to load their pictures
+      for (let i = 0; i < 10 && list.some((x) => !x.pic); i++) {
+        await sleep(300);
+        list.forEach((x) => { const img = x.row.querySelector("img"); if (img && isCdn(img.src)) x.pic = img.currentSrc || img.src; });
+      }
+    }
     box.scrollTo({ top: start });
-    return list.length ? list : found;
+    return list.length ? list.map((x) => ({ uid: x.uid, pic: x.pic, username: "" })) : found;
   }
   let reqBusy = false;
   setInterval(async () => {
