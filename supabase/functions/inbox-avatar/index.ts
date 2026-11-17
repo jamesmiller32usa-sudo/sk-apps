@@ -45,6 +45,12 @@ Deno.serve(async (req) => {
   };
   let list: any[] = await find(pageId);
   if (!list.length && pageId) list = await find(null);
+  // A brand new chat shows in Business Suite at the same moment Meta sends us the webhook, so the
+  // customer may not be in our database yet. Wait for it (up to about 25 seconds) instead of giving up.
+  for (let i = 0; !list.length && i < 12; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    list = await find(pageId);
+  }
   if (list.length > 1 && fbUid) {
     const same = list.filter((r) => r.fb_uid === fbUid);
     if (same.length === 1) list = same;
