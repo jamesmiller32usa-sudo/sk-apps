@@ -87,3 +87,39 @@ chrome.alarms.onAlarm.addListener((a) => { if (a.name === "robot") keepWindows()
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (msg && msg.type === "robot") { isRobot().then((r) => reply({ robot: r })); return true; }
 });
+
+// ── "Get photo" requests from the CRM ──
+const REST = "https://dkwlsfzysjdubcwuemvx.supabase.co/rest/v1/ib_avatar_requests";
+const H = { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json", Prefer: "return=representation" };
+async function claimRequests(pageId) {
+  const since = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+  const r = await fetch(`${REST}?select=id,contact_id,name&status=eq.new&page_id=eq.${pageId}&created_at=gt.${since}&order=created_at&limit=3`, { headers: H });
+  const rows = await r.json();
+  const mine = [];
+  for (const q of Array.isArray(rows) ? rows : []) {
+    const c = await fetch(`${REST}?id=eq.${q.id}&status=eq.new`, { method: "PATCH", headers: H, body: JSON.stringify({ status: "working", updated_at: new Date().toISOString() }) });
+    const got = await c.json();
+    if (Array.isArray(got) && got.length) mine.push(q); // another tab may have taken it first
+  }
+  return mine;
+}
+async function finish(id, status, note) {
+  await fetch(`${REST}?id=eq.${id}`, { method: "PATCH", headers: H, body: JSON.stringify({ status, note: note || null, updated_at: new Date().toISOString() }) });
+}
+async function resolveRequest(q, list) {
+  if (!list.length) return finish(q.id, "failed", "Not found in Business Suite search");
+  const pick = await call({ resolve: true, contact_id: q.contact_id, candidates: list.map((x) => ({ uid: x.uid, username: x.username })) });
+  if (!pick.uid) return finish(q.id, "failed", pick.reason || "Could not tell which person it is");
+  const hit = list.find((x) => x.uid === pick.uid);
+  const body = { contact_id: q.contact_id, fb_uid: pick.uid, force: true };
+  if (hit && hit.pic) {
+    const res = await fetch(hit.pic);
+    if (res.ok) { body.type = res.headers.get("content-type") || "image/jpeg"; body.image = toB64(await res.arrayBuffer()); }
+  }
+  const out = await call(body);
+  return finish(q.id, out.status === "saved" || out.status === "exists" ? "done" : "failed", out.error || null);
+}
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg && msg.type === "requests") { claimRequests(msg.page_id).then((items) => reply({ items })).catch(() => reply({ items: [] })); return true; }
+  if (msg && msg.type === "resolve") { resolveRequest(msg.request, msg.list || []).then(() => reply({ ok: true })).catch(() => { finish(msg.request.id, "failed", "Extension error").finally(() => reply({ ok: false })); }); return true; }
+});

@@ -31,6 +31,43 @@ Deno.serve(async (req) => {
     return json({ names: [...new Set(names)].slice(0, 200) });
   }
 
+  // "Get photo" from the CRM: the extension searched the name in Business Suite and sends the people it found.
+  // Pick the one that belongs to this customer: skip ids that already belong to someone else on the page.
+  if (body.resolve) {
+    const { data: c } = await sb.from("ib_contacts").select("id, page_id, fb_uid").eq("id", String(body.contact_id || "")).maybeSingle();
+    if (!c) return json({ reason: "Customer not found" });
+    const cands = (Array.isArray(body.candidates) ? body.candidates : []).filter((x: any) => /^\d{6,20}$/.test(String(x.uid)));
+    if (c.fb_uid && cands.some((x: any) => x.uid === c.fb_uid)) return json({ uid: c.fb_uid });
+    const ids = cands.map((x: any) => String(x.uid));
+    const { data: taken } = ids.length ? await sb.from("ib_contacts").select("fb_uid").eq("page_id", c.page_id).neq("id", c.id).in("fb_uid", ids) : { data: [] };
+    const used = new Set((taken || []).map((r: any) => r.fb_uid));
+    const free = cands.filter((x: any) => !used.has(String(x.uid)));
+    if (free.length === 1) return json({ uid: String(free[0].uid) });
+    // only one person with this name exists in Business Suite: the other chat is the same person
+    if (!free.length && cands.length === 1) return json({ uid: String(cands[0].uid) });
+    return json({ reason: free.length ? "Two people with this name, could not tell which" : "Not found" });
+  }
+  // Save straight to a known customer (used by "Get photo").
+  if (body.contact_id && !body.check) {
+    const { data: c } = await sb.from("ib_contacts").select("id, fb_uid").eq("id", String(body.contact_id)).maybeSingle();
+    if (!c) return json({ status: "unknown" });
+    const fb = /^\d{6,20}$/.test(String(body.fb_uid || "")) ? String(body.fb_uid) : null;
+    const patch: Record<string, unknown> = {};
+    if (fb) patch.fb_uid = fb;
+    if (body.image) {
+      const bytes = b64ToBytes(String(body.image));
+      if (bytes.length < 200 || bytes.length > 400000) return json({ error: "bad image size" }, 400);
+      const type = /png|webp|jpeg|jpg|avif/.test(String(body.type)) ? String(body.type) : "image/jpeg";
+      const ext = type.includes("png") ? "png" : type.includes("webp") ? "webp" : type.includes("avif") ? "avif" : "jpg";
+      const path = `avatars/${c.id}.${ext}`;
+      const up = await sb.storage.from("inbox-media").upload(path, bytes, { contentType: type, upsert: true, cacheControl: "604800" });
+      if (up.error) return json({ error: up.error.message }, 500);
+      patch.profile_pic = `${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/inbox-media/${path}?v=${Date.now()}`;
+    }
+    if (Object.keys(patch).length) await sb.from("ib_contacts").update(patch).eq("id", c.id);
+    return json({ status: Object.keys(patch).length ? "saved" : "exists" });
+  }
+
   const name = String(body.name || "").trim();
   const pageId = body.page_id ? String(body.page_id) : null;
   const fbUid = /^\d{6,20}$/.test(String(body.fb_uid || "")) ? String(body.fb_uid) : null;

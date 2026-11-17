@@ -66,6 +66,66 @@
   new MutationObserver(kick).observe(document.body, { childList: true, subtree: true });
   kick();
 
+
+  // ── "Get photo" button in the CRM ──
+  // Every 3 seconds ask whether someone pressed "Get photo" for a customer of this page. If so, look the
+  // name up with the inbox search (works however far down the chat is) and send the result to the server.
+  function findInPage(name, rid) {
+    return new Promise((res) => {
+      const done = (ev) => { const d = ev.data; if (ev.source === window && d && d.sk === "found" && d.rid === rid) { window.removeEventListener("message", done); res(d.list || []); } };
+      window.addEventListener("message", done);
+      window.postMessage({ sk: "find", name, rid }, "*");
+      setTimeout(() => { window.removeEventListener("message", done); res([]); }, 9000);
+    });
+  }
+  // Who with this exact name is visible in the chat list right now (Facebook id comes from the row itself).
+  function rowsNamed(name) {
+    const want = name.trim().toLowerCase(), out = new Map();
+    document.querySelectorAll("[data-maiba-contact-id]").forEach((row) => {
+      const first = ((row.innerText || "").trim().split("\n")[0] || "").trim().toLowerCase();
+      const img = row.querySelector("img");
+      const uid = row.getAttribute("data-maiba-contact-id");
+      if (first === want && img && isCdn(img.src) && /^\d{6,20}$/.test(uid || "")) out.set(uid, { uid, pic: img.currentSrc || img.src, username: "" });
+    });
+    return [...out.values()];
+  }
+  async function handleRequest(q) {
+    // 1. already on screen: instant
+    let list = rowsNamed(q.name);
+    if (list.length) return list;
+    // 2. inbox search: works however far down the chat is, if only one person has this name
+    const found = await findInPage(q.name, q.id);
+    if (found.length === 1) return found;
+    // 3. common name: walk down the chat list until the row appears
+    const box = listBox();
+    if (!box) return found;
+    const start = box.scrollTop;
+    let stuck = 0, prevH = 0;
+    for (let i = 0; i < 150 && !list.length; i++) {
+      const before = box.scrollTop;
+      box.scrollBy({ top: Math.round(box.clientHeight * 0.85) });
+      await sleep(1100);
+      list = rowsNamed(q.name);
+      if (box.scrollTop === before && box.scrollHeight === prevH) { if (++stuck >= 8) break; box.scrollBy({ top: -150 }); await sleep(600); } else stuck = 0;
+      prevH = box.scrollHeight;
+    }
+    box.scrollTo({ top: start });
+    return list.length ? list : found;
+  }
+  let reqBusy = false;
+  setInterval(async () => {
+    if (reqBusy || !pageId()) return;
+    reqBusy = true;
+    try {
+      const r = await ask({ type: "requests", page_id: pageId() });
+      for (const q of r.items || []) {
+        const list = await handleRequest(q);
+        await ask({ type: "resolve", request: q, list });
+      }
+    } catch (e) {}
+    reqBusy = false;
+  }, 3000);
+
   // ── catch-up ──
   let userBusy = 0;
   let robot = false; // set by the background script; true only on the 24/7 server browser

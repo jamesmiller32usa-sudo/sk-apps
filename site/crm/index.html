@@ -608,6 +608,7 @@ td.r,th.r{text-align:right}
 .bs-vp{font-size:12.5px;font-weight:600;color:#0a66d8;text-decoration:none;margin-left:6px}
 .bs-vp2{display:inline-block;font-size:13px;font-weight:600;color:#0a66d8;text-decoration:none;margin:2px 0}
 .bs-vp.off,.bs-vp2.off{color:#8a8d91;font-weight:500;cursor:help}
+.bs-gp{margin-left:6px;border:1px solid #ced0d4;background:#fff;border-radius:6px;padding:1px 8px;font:inherit;font-size:12px;font-weight:600;color:#1c2b33;cursor:pointer}.bs-gp:hover{background:#f0f2f5}.bs-gp[disabled]{color:#8a8d91;cursor:default}
 /* full screen inbox */
 body.ib-full #page-inbox.active{position:fixed;inset:0;z-index:5000;height:100vh;min-height:0;background:#f0f2f5;padding:8px;margin:0}
 body.ib-full:has(#page-inbox.active){overflow:hidden}
@@ -1992,7 +1993,7 @@ var IB = (function(){
   function cur(){ return S.list.find(function(x){ return x.id === S.sel; }); }
 
   // ── list ──
-  var COLS = 'id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,last_outbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done,follow_up,is_spam,customer_seen_at,st_seen,fb_uid';
+  var COLS = 'id,contact_id,page_id,platform,name,profile_pic,last_message_at,last_message_text,last_message_dir,last_inbound_at,last_outbound_at,unread_count,assigned_to,stage_key,stage_set_at,stage_set_by,ai_summary,source_ad_id,source_post_id,ad_title,ad_text,ad_picture,ad_link,sla_minutes,is_closed,mins_in_stage,is_stuck,last_reminder_at,is_done,follow_up,is_spam,customer_seen_at,st_seen,fb_uid';
   S.flt = ''; S.ch = '';
   function flt(b){
     var k = b.dataset.f; S.flt = S.flt === k ? '' : k;
@@ -2259,8 +2260,37 @@ var IB = (function(){
     });
   }
   function profileLink(c, cls){
-    return c.fb_uid ? '<a class="' + cls + '" href="https://www.facebook.com/' + esc(c.fb_uid) + '" target="_blank" rel="noopener">View profile</a>'
-      : '<span class="' + cls + ' off" title="The link appears once this customer has been shown in Business Suite with the SK Inbox Pictures extension">Profile link pending</span>';
+    var ours = c.profile_pic && String(c.profile_pic).indexOf('/inbox-media/avatars/') >= 0;
+    var st = S.gp && S.gp[c.id];
+    var btn = (!c.fb_uid || !ours) ? ' <button class="bs-gp" ' + (st ? 'disabled' : '') + ' onclick="IB.getPhoto(\'' + c.id + '\')" title="Fetch this customer\'s photo and profile link from Business Suite">' + (st ? 'Getting…' : '↻ Get photo') + '</button>' : '';
+    return (c.fb_uid ? '<a class="' + cls + '" href="https://www.facebook.com/' + esc(c.fb_uid) + '" target="_blank" rel="noopener">View profile</a>'
+      : '<span class="' + cls + ' off" title="Press Get photo to fetch it">Profile link pending</span>') + btn;
+  }
+  // "Get photo": leave a request; the SK Inbox Pictures extension in an open Business Suite tab searches
+  // the name, and sends the photo and Facebook id back. We watch the request and refresh when it is done.
+  function getPhoto(id){
+    var c = S.list.find(function(x){ return x.id === id; }); if (!c) return;
+    if (!c.contact_id) { alertBox('Reload the inbox and try again'); return; }
+    S.gp = S.gp || {}; S.gp[id] = 1; renderHead(c); renderDetails(c);
+    supaFetch('ib_avatar_requests', { method: 'POST', body: JSON.stringify({ contact_id: c.contact_id, name: c.name, page_id: c.page_id }) })
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        var rid = rows && rows[0] && rows[0].id; if (!rid) throw new Error('could not create the request');
+        var t0 = Date.now();
+        (function poll(){
+          q('ib_avatar_requests?select=status,note&id=eq.' + rid).then(function(x){
+            var st = x && x[0] && x[0].status;
+            var stop = function(msg, ok){ delete S.gp[id]; S.gpSlow = 0; if (msg) toast(msg, ok ? 'ok' : 'err'); load(true); var cc = cur(); if (cc && cc.id === id) { renderHead(cc); renderDetails(cc); } };
+            if (st === 'done') return stop('Photo and profile link updated', true);
+            if (st === 'failed') return stop('Could not get the photo: ' + ((x[0].note) || 'unknown reason'));
+            if (st === 'new' && Date.now() - t0 > 8000) return stop('Business Suite is not open for ' + pageName(c.page_id) + ' on any computer with the extension');
+            if (Date.now() - t0 > 240000) return stop('Timed out, try again');
+            if (st === 'working' && Date.now() - t0 > 10000 && !S.gpSlow) { S.gpSlow = 1; toast('Common name: searching further down the chat list, this can take a minute', 'ok'); }
+            setTimeout(poll, 1000);
+          }).catch(function(){ setTimeout(poll, 1500); });
+        })();
+      })
+      .catch(function(e){ delete S.gp[id]; renderHead(c); renderDetails(c); alertBox('Could not ask for the photo: ' + e.message); });
   }
   function pushLocal(m){ m._local = true; m.direction = 'out'; m.sender_type = 'moderator'; m.sent_by = me(); m.sent_at = new Date().toISOString(); m.send_status = 'pending'; S.msgs.push(m); renderMsgs(false); }
   function afterSend(r){
@@ -2731,7 +2761,7 @@ var IB = (function(){
     show: show, view: view, tab: tab, setPage: setPage, load: load, debounceLoad: debounceLoad, open: open, send: send, useTpl: useTpl,
     setStage: setStage, assign: assign, remLoad: remLoad, remPick: remPick, remAll: remAll, remFirst: remFirst, remTpl: remTpl,
     remSend: remSend, jump: jump, comLoad: comLoad, comDone: comDone, saveStages: saveStages, addTpl: addTpl, delTpl: delTpl, saveTpls: saveTpls,
-    flt: flt, fsel: fsel, full: full, star: star, rxPick: rxPick, react: react, spam: spam, del: del, clearPending: clearPending,
+    flt: flt, fsel: fsel, full: full, getPhoto: getPhoto, star: star, rxPick: rxPick, react: react, spam: spam, del: del, clearPending: clearPending,
     srRender: srRender, srOpen: srOpen, srNew: srNew, srSave: srSave, srDel: srDel, srImg: srImg, srUpload: srUpload,
     repRange: repRange, repGo: repGo, repStage: repStage, pickFile: pickFile, pop: pop, srFilter: srFilter, useSaved: useSaved, addEmoji: addEmoji, hideAd: hideAd, done: done, unread: unread
   };
