@@ -8,13 +8,22 @@
   const bad = /^(\d{1,2}:\d{2}\s?(AM|PM)?|Yesterday|Today|Mon|Tue|Wed|Thu|Fri|Sat|Sun|\d+[mhdw])$/i;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+  // Text of an element as separate lines, read from the text itself so it works even when the tab is in
+  // the background (then the browser does not lay the page out and innerText loses its line breaks).
+  function textLines(el) {
+    const out = [];
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = w.nextNode()) && out.length < 12) { const t = (n.nodeValue || "").replace(/\u200b/g, "").trim(); if (t) out.push(t); }
+    return out;
+  }
   function nameFor(img) {
     if (img.alt && img.alt.trim().length > 1) return img.alt.trim();
     let el = img;
     for (let i = 0; i < 9 && el; i++) {
       el = el.parentElement;
       if (!el) break;
-      const line = (el.innerText || "").trim().split("\n")[0].trim();
+      const line = (textLines(el)[0] || "").trim();
       if (line && !bad.test(line) && line.length <= 80) return line;
     }
     return "";
@@ -30,7 +39,7 @@
     for (let i = 0; i < 9 && el; i++) {
       el = el.parentElement;
       if (!el) break;
-      const lines = (el.innerText || "").trim().split("\n").map((x) => x.trim()).filter(Boolean);
+      const lines = textLines(el);
       if (lines.length >= 2 && !bad.test(lines[0])) return lines.slice(1).find((l) => !bad.test(l)) || "";
     }
     return "";
@@ -86,7 +95,7 @@
   function rowsNamed(name) {
     const want = name.trim().toLowerCase(), out = new Map();
     document.querySelectorAll("[data-maiba-contact-id]").forEach((row) => {
-      const first = ((row.innerText || "").trim().split("\n")[0] || "").trim().toLowerCase();
+      const first = (textLines(row)[0] || "").trim().toLowerCase();
       const img = row.querySelector("img");
       const uid = row.getAttribute("data-maiba-contact-id");
       // the picture may still be loading while the list scrolls; the Facebook id is enough to match
