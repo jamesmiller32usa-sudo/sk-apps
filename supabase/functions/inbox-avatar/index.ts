@@ -82,6 +82,16 @@ Deno.serve(async (req) => {
   };
   let list: any[] = await find(pageId);
   if (!list.length && pageId) list = await find(null);
+  // Fancy letters (Ö vs Õ, different Unicode forms): compare names without accents on this page.
+  if (!list.length && pageId) {
+    const plain = (t: string) => String(t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+    const want = plain(name);
+    const word = want.split(" ").filter((w) => /^[a-z]{3,}$/.test(w)).sort((a, b) => b.length - a.length)[0];
+    if (word) {
+      const { data } = await sb.from("ib_contacts").select("id, page_id, profile_pic, fb_uid, name, ib_conversations(last_message_text, last_message_at)").eq("page_id", pageId).ilike("name", `%${word}%`).limit(50);
+      list = (data || []).filter((r: any) => plain(r.name) === want);
+    }
+  }
   // A brand new chat shows in Business Suite at the same moment Meta sends us the webhook, so the
   // customer may not be in our database yet. Wait for it (up to about 25 seconds) instead of giving up.
   for (let i = 0; !list.length && i < 12; i++) {
