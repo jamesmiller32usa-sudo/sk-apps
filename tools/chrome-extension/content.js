@@ -56,6 +56,13 @@
   }
   let t = null;
   const kick = () => { clearTimeout(t); t = setTimeout(scan, 1200); };
+  // Retry: forget what was already sent every 3 minutes and look again. Customers already saved are
+  // skipped by the background cache, so only the ones that failed (for example a brand new chat that
+  // was not in the database yet) are tried again.
+  setInterval(() => { sent.clear(); scan(); }, 3 * 60 * 1000);
+  // Keep the page fresh: reload Business Suite every 2 hours, but only when nobody has used it for 10 minutes.
+  const bornAt = Date.now();
+  setInterval(() => { if (Date.now() - bornAt > 2 * 3600e3 && Date.now() - userBusy > 10 * 60 * 1000) location.reload(); }, 5 * 60 * 1000);
   new MutationObserver(kick).observe(document.body, { childList: true, subtree: true });
   kick();
 
@@ -82,7 +89,7 @@
   async function catchUp() {
     const ck = "catchup_at_" + pageId(); // each page keeps its own timer, so all three tabs catch up
     const last = (await chrome.storage.local.get(ck))[ck] || 0;
-    if (Date.now() - last < (robot ? 10 : 30) * 60 * 1000) return; // humans: every 30 min; robot: every 10 min per page
+    if (Date.now() - last < (robot ? 10 : 15) * 60 * 1000) return; // humans: every 30 min; robot: every 10 min per page
     const r = await ask({ type: "missing", page_id: pageId() });
     let need = (r.names || []).filter((n) => !seenNames.has(n));
     if (!need.length) return;
@@ -132,7 +139,7 @@
       setInterval(() => { catchUp().catch(() => {}); }, 11 * 60 * 1000);
     } else {
       setTimeout(() => { catchUp().catch(() => {}); }, 10000);
-      setInterval(() => { catchUp().catch(() => {}); }, 31 * 60 * 1000);
+      setInterval(() => { catchUp().catch(() => {}); }, 16 * 60 * 1000);
     }
   });
 })();
