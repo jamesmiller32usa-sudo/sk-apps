@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SK Inbox Pictures",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Copies customer profile pictures and profile links that Business Suite shows into the Sharangakutir CRM inbox. It only reads the inbox and, when asked from the CRM, searches a customer's name. It never opens chats or sends messages.",
   "permissions": [
     "alarms",

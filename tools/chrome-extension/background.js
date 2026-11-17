@@ -123,3 +123,16 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (msg && msg.type === "requests") { claimRequests(msg.page_id).then((items) => reply({ items })).catch(() => reply({ items: [] })); return true; }
   if (msg && msg.type === "resolve") { resolveRequest(msg.request, msg.list || []).then(() => reply({ ok: true })).catch(() => { finish(msg.request.id, "failed", "Extension error").finally(() => reply({ ok: false })); }); return true; }
 });
+
+// ── self update ──
+// The extension runs from a folder on this computer. When newer files are put in that folder, reload
+// the extension so they take effect, without anyone opening the Extensions page.
+async function checkUpdate() {
+  try {
+    const r = await fetch(chrome.runtime.getURL("manifest.json") + "?t=" + Date.now(), { cache: "no-store" });
+    const disk = (await r.json()).version;
+    if (disk && disk !== chrome.runtime.getManifest().version) chrome.runtime.reload();
+  } catch (e) {}
+}
+chrome.alarms.create("selfupdate", { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener((a) => { if (a.name === "selfupdate") checkUpdate(); });

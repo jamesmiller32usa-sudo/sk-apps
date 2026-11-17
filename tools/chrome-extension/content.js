@@ -62,7 +62,11 @@
   setInterval(() => { sent.clear(); scan(); }, 3 * 60 * 1000);
   // Keep the page fresh: reload Business Suite every 2 hours, but only when nobody has used it for 10 minutes.
   const bornAt = Date.now();
-  setInterval(() => { if (Date.now() - bornAt > 2 * 3600e3 && Date.now() - userBusy > 10 * 60 * 1000) location.reload(); }, 5 * 60 * 1000);
+  // Business Suite sometimes stops showing new chats after a while, so refresh it every 20 minutes
+  // (only when nobody has touched the page for 5 minutes).
+  setInterval(() => { if (Date.now() - bornAt > 20 * 60 * 1000 && Date.now() - userBusy > 5 * 60 * 1000) location.reload(); }, 60 * 1000);
+  // After the extension updates itself this copy of the script is cut off; reload the page to get the new one.
+  setInterval(() => { try { if (!chrome.runtime || !chrome.runtime.id) location.reload(); } catch (e) { location.reload(); } }, 15 * 1000);
   new MutationObserver(kick).observe(document.body, { childList: true, subtree: true });
   kick();
 
@@ -101,8 +105,9 @@
     const box = listBox();
     if (!box) return found;
     const start = box.scrollTop;
+    const until = Date.now() + 90 * 1000; // never hold up other requests for more than 90 seconds
     let stuck = 0, prevH = 0;
-    for (let i = 0; i < 150 && !list.length; i++) {
+    for (let i = 0; i < 150 && !list.length && Date.now() < until; i++) {
       const before = box.scrollTop;
       box.scrollBy({ top: Math.round(box.clientHeight * 0.85) });
       await sleep(1100);
