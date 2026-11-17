@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
   // Find the customer: same name (prefer the page Business Suite shows); break ties with the Facebook id or the last message.
   const find = async (pid: string | null) => {
-    let q = sb.from("ib_contacts").select("id, page_id, profile_pic, fb_uid, ib_conversations(last_message_text)").eq("name", name);
+    let q = sb.from("ib_contacts").select("id, page_id, profile_pic, fb_uid, ib_conversations(last_message_text, last_message_at)").eq("name", name);
     if (pid) q = q.eq("page_id", pid);
     const { data } = await q.limit(10);
     return data || [];
@@ -54,6 +54,8 @@ Deno.serve(async (req) => {
   if (list.length > 1 && fbUid) {
     const same = list.filter((r) => r.fb_uid === fbUid);
     if (same.length === 1) list = same;
+    // a customer who already has a different Facebook id is someone else
+    else list = list.filter((r) => !r.fb_uid || r.fb_uid === fbUid);
   }
   if (list.length > 1 && body.preview) {
     const p = norm(body.preview);
@@ -62,6 +64,11 @@ Deno.serve(async (req) => {
       return p.length >= 4 && t && (t.startsWith(p.slice(0, 40)) || p.startsWith(t.slice(0, 40)));
     });
     if (hit.length === 1) list = hit;
+    else if (p.length >= 6) {
+      const k = p.slice(0, 14);
+      const loose = list.filter((r) => norm(r.ib_conversations?.[0]?.last_message_text || "").includes(k));
+      if (loose.length === 1) list = loose;
+    }
   }
   if (list.length !== 1) return json(body.check ? { need: false, reason: list.length ? "ambiguous" : "unknown" } : { status: list.length ? "ambiguous" : "unknown" });
   const c = list[0];

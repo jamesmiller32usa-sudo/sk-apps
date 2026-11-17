@@ -28,7 +28,7 @@ async function work() {
       if (await done(key)) continue;
       const base = { name: it.name, page_id: it.page_id, fb_uid: it.fb_uid || null, preview: it.preview || "" };
       const chk = await call({ ...base, check: true });
-      if (!chk.need) { if (chk.reason !== "unknown") await mark(key); continue; }
+      if (!chk.need) { if (!chk.reason) await mark(key); continue; } // unknown or ambiguous: try again later
       const body = { ...base };
       if (chk.needImage) {
         const res = await fetch(it.src);
@@ -37,7 +37,7 @@ async function work() {
         body.image = toB64(await res.arrayBuffer());
       }
       const out = await call(body);
-      if (out.status === "saved" || out.status === "exists" || out.status === "ambiguous") await mark(key);
+      if (out.status === "saved" || out.status === "exists") await mark(key);
     } catch (e) { /* try again next time it is on screen */ }
     await new Promise((r) => setTimeout(r, 600));
   }
