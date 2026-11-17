@@ -3177,8 +3177,11 @@ function mcOpenPanel(orderId, edit){
     + '<div class="d-field"><div class="d-label">Customer</div><div class="d-val">' + mcEsc(o.name || '-') + '</div></div>'
     + '<div class="d-field"><div class="d-label">District / Parcel</div><div class="d-val">' + mcEsc((o.district || '-') + ' / ' + (o.parcel_status || '-')) + '</div></div>'
     + '<div class="d-field full"><div class="d-label">Item Description</div><div class="d-val">' + mcEsc(o.item_description || '-') + '</div></div>'
-    + (note ? '<div class="d-field full"><div class="d-label">Note</div><div class="d-val">' + mcEsc(note) + '</div></div>' : '')
-    + (o.hold_note ? '<div class="d-field full"><div class="d-label">Hold Note</div><div class="d-val">' + mcEsc(o.hold_note) + '</div></div>' : '')
+    + (edit || x.status === 'review'
+      ? '<div class="d-field full"><div class="d-label">Note</div><textarea id="mc-fix-note" rows="2" style="width:100%;box-sizing:border-box;border:1px solid #d9d9e3;border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;resize:vertical">' + mcEsc(note) + '</textarea></div>'
+        + '<div class="d-field full"><div class="d-label">Hold Note</div><textarea id="mc-fix-hold" rows="2" style="width:100%;box-sizing:border-box;border:1px solid #d9d9e3;border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;resize:vertical">' + mcEsc(o.hold_note || '') + '</textarea></div>'
+      : (note ? '<div class="d-field full"><div class="d-label">Note</div><div class="d-val">' + mcEsc(note) + '</div></div>' : '')
+        + (o.hold_note ? '<div class="d-field full"><div class="d-label">Hold Note</div><div class="d-val">' + mcEsc(o.hold_note) + '</div></div>' : ''))
     + '<div class="d-field"><div class="d-label">COD / Advance / Due</div><div class="d-val">' + mcTk(o.cod_amount) + ' / ' + mcTk(o.advance_amount) + ' / ' + mcTk(o.due_amount) + '</div></div>'
     + '<div class="d-field"><div class="d-label">Delivery Charge</div><div class="d-val">' + mcTk(x.delivery_charge) + '</div></div>'
     + '</div></div>';
@@ -3253,7 +3256,23 @@ function mcSaveFix(){
     if (l.code === 'WB_GENERIC' && mcGenericUnit(l.size, l.finish) == null && !hasUnit) { toast('Enter the wallboard size like 36x24, or type the unit cost', 'err'); return; }
   }
   var btn = document.getElementById('mc-fix-save'); btn.disabled = true; btn.textContent = 'Saving...';
-  fetch(MC_FN, { method: 'POST', headers: { 'Authorization': 'Bearer ' + SUPA_KEY, 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+  // notes first: save Note and Hold Note on the order if they were changed here
+  var ord = mcOrderById(mcPanelRow.order_id) || {};
+  var oldNote = ord.note && !/^empty$/i.test(String(ord.note).trim()) ? String(ord.note) : '';
+  var nEl = document.getElementById('mc-fix-note'), hEl = document.getElementById('mc-fix-hold');
+  var patch = {};
+  if (nEl && nEl.value.trim() !== oldNote.trim()) patch.note = nEl.value.trim();
+  if (hEl && hEl.value.trim() !== String(ord.hold_note || '').trim()) patch.hold_note = hEl.value.trim();
+  var notesSaved = !Object.keys(patch).length ? Promise.resolve() :
+    supaFetch('orders?id=eq.' + encodeURIComponent(mcPanelRow.order_id), { method: 'PATCH', body: JSON.stringify(patch) })
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        if (!Array.isArray(rows) || !rows.length) throw new Error('order not found');
+        Object.keys(patch).forEach(function(k){ ord[k] = patch[k]; });
+        if (typeof orders !== 'undefined') orders.forEach(function(x){ if (String(x.id) === String(mcPanelRow.order_id)) Object.keys(patch).forEach(function(k){ x[k] = patch[k]; }); });
+      });
+  notesSaved.catch(function(e){ btn.disabled = false; btn.textContent = 'Save'; toast('Could not save the note: ' + e.message, 'err'); throw e; })
+  .then(function(){ return fetch(MC_FN, { method: 'POST', headers: { 'Authorization': 'Bearer ' + SUPA_KEY, 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'fix', order_id: mcPanelRow.order_id, lines: mcEditLines, sales: Number(sales), remember: document.getElementById('mc-fix-remember').checked }) })
     .then(function(r){ return r.json(); })
     .then(function(j){
@@ -3265,6 +3284,7 @@ function mcSaveFix(){
       mcLoad().then(function(){ if (active === 'mc-review') mcRenderReview(); if (active === 'mc-orders') mcRenderOrders(); });
     })
     .catch(function(e){ btn.disabled = false; btn.textContent = 'Save'; toast('Could not reach the server: ' + e.message, 'err'); });
+  }).catch(function(){ /* note save failed, already shown */ });
 }
 
 // ── products and rates ──
