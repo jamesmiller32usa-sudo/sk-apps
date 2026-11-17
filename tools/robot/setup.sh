@@ -8,6 +8,12 @@ PORT=3901
 
 command -v docker >/dev/null 2>&1 || curl -fsSL https://get.docker.com | sh
 
+# small servers: add 2 GB swap once so Chromium can never push n8n out of memory
+if ! swapon --show | grep -q .; then
+  fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
 mkdir -p $DIR/ext $DIR/config
 for f in manifest.json content.js background.js; do curl -fsSL "$REPO/$f?t=$(date +%s)" -o $DIR/ext/$f; done
 echo '{"robot":true}' > $DIR/ext/robot.json
@@ -16,7 +22,7 @@ chmod -R a+rX $DIR/ext
 PASS=$(cat $DIR/pass.txt)
 
 docker rm -f sk-robot >/dev/null 2>&1 || true
-docker run -d --name sk-robot --restart unless-stopped --shm-size=1g \
+docker run -d --name sk-robot --restart unless-stopped --shm-size=1g --memory=2g --cpus=0.8 \
   --security-opt seccomp=unconfined \
   -e PUID=1000 -e PGID=1000 -e TZ=Asia/Dhaka \
   -e CUSTOM_USER=sk -e PASSWORD="$PASS" \
