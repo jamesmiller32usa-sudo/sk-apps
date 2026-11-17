@@ -61,6 +61,7 @@
 
   // ── catch-up ──
   let userBusy = 0;
+  let robot = false; // set by the background script; true only on the 24/7 server browser
   ["wheel", "mousedown", "keydown", "touchstart"].forEach((ev) => window.addEventListener(ev, (e) => { if (e.isTrusted) userBusy = Date.now(); }, true));
 
   function listBox() {
@@ -79,18 +80,19 @@
   function ask(msg) { return new Promise((res) => chrome.runtime.sendMessage(msg, (r) => res(r || {}))); }
 
   async function catchUp() {
-    const last = (await chrome.storage.local.get("catchup_at")).catchup_at || 0;
-    if (Date.now() - last < 30 * 60 * 1000) return; // at most every 30 minutes per browser
+    const ck = "catchup_at" + (robot ? "_" + pageId() : "");
+    const last = (await chrome.storage.local.get(ck))[ck] || 0;
+    if (Date.now() - last < (robot ? 10 : 30) * 60 * 1000) return; // humans: every 30 min; robot: every 10 min per page
     const r = await ask({ type: "missing", page_id: pageId() });
     let need = (r.names || []).filter((n) => !seenNames.has(n));
     if (!need.length) return;
-    await chrome.storage.local.set({ catchup_at: Date.now() });
+    await chrome.storage.local.set({ [ck]: Date.now() });
     const box = listBox();
     if (!box) return;
     let steps = 0, stuck = 0, prevH = 0;
     while (need.length && steps < 60) {
       if (document.visibilityState !== "visible") { await sleep(3000); continue; }
-      if (Date.now() - userBusy < 15000) return; // the person is using the inbox: stop and leave the list where they put it
+      if (!robot && Date.now() - userBusy < 15000) return; // the person is using the inbox: stop and leave the list where they put it
       const before = box.scrollTop;
       box.scrollBy({ top: Math.round(box.clientHeight * (0.6 + Math.random() * 0.2)), behavior: "smooth" });
       steps++;
@@ -103,6 +105,34 @@
     await sleep(1500);
     if (Date.now() - userBusy > 15000) box.scrollTo({ top: 0, behavior: "smooth" });
   }
-  setTimeout(() => { catchUp().catch(() => {}); }, 10000);
-  setInterval(() => { catchUp().catch(() => {}); }, 31 * 60 * 1000);
+  // robot only: once a day scroll the whole list to the bottom so every old customer is collected
+  async function fullSweep() {
+    const k = "sweep_" + pageId();
+    const last = (await chrome.storage.local.get(k))[k] || 0;
+    if (Date.now() - last < 24 * 3600e3) return;
+    const box = listBox(); if (!box) return;
+    let stuck = 0, prevH = 0, steps = 0;
+    while (stuck < 40 && steps < 3000) {
+      const before = box.scrollTop;
+      box.scrollBy({ top: Math.round(box.clientHeight * 0.7), behavior: "smooth" });
+      steps++;
+      await sleep(2500 + Math.random() * 1500);
+      scan();
+      if (box.scrollTop === before && box.scrollHeight === prevH) { stuck++; box.scrollBy({ top: -200 }); await sleep(800); } else stuck = 0;
+      prevH = box.scrollHeight;
+    }
+    await chrome.storage.local.set({ [k]: Date.now() });
+    box.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  ask({ type: "robot" }).then((r) => {
+    robot = !!r.robot;
+    if (robot) {
+      setInterval(scan, 5000); // new chats jump to the top of the list; pick them up within seconds
+      setTimeout(() => { fullSweep().catch(() => {}).then(() => catchUp().catch(() => {})); }, 20000);
+      setInterval(() => { catchUp().catch(() => {}); }, 11 * 60 * 1000);
+    } else {
+      setTimeout(() => { catchUp().catch(() => {}); }, 10000);
+      setInterval(() => { catchUp().catch(() => {}); }, 31 * 60 * 1000);
+    }
+  });
 })();

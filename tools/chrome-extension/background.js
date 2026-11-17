@@ -50,3 +50,40 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   }
   if (msg && msg.type === "avatars") { for (const it of msg.items) if (!queue.some((q) => q.name === it.name && q.fb_uid === it.fb_uid)) queue.push(it); work(); }
 });
+
+// ── robot mode (24/7 server browser only) ──
+// Turned on only when the folder contains robot.json. A normal moderator install has no robot.json,
+// so none of this runs there. In robot mode the extension keeps one visible window per page open
+// and reloads each one every 3 hours so the inbox list stays fresh.
+const PAGES = ["378409686340444", "418805531314590", "118478659947199"];
+const inbox = (id) => "https://business.facebook.com/latest/inbox/all/?asset_id=" + id;
+let robotFlag = null;
+async function isRobot() {
+  if (robotFlag !== null) return robotFlag;
+  try { const r = await fetch(chrome.runtime.getURL("robot.json")); robotFlag = r.ok; } catch (e) { robotFlag = false; }
+  return robotFlag;
+}
+async function keepWindows() {
+  if (!(await isRobot())) return;
+  const st = (await chrome.storage.local.get("robot_tabs")).robot_tabs || {};
+  for (let i = 0; i < PAGES.length; i++) {
+    const id = PAGES[i];
+    let alive = false;
+    if (st[id]) { try { await chrome.tabs.get(st[id].tab); alive = true; } catch (e) {} }
+    if (!alive) {
+      const w = await chrome.windows.create({ url: inbox(id), left: i * 640, top: 0, width: 640, height: 1000, focused: false, state: "normal" });
+      st[id] = { tab: w.tabs[0].id, at: Date.now() };
+    } else if (Date.now() - st[id].at > 3 * 3600e3) {
+      await chrome.tabs.update(st[id].tab, { url: inbox(id) });
+      st[id].at = Date.now();
+    }
+  }
+  await chrome.storage.local.set({ robot_tabs: st });
+}
+chrome.runtime.onStartup.addListener(() => { setTimeout(keepWindows, 5000); });
+chrome.runtime.onInstalled.addListener(() => { setTimeout(keepWindows, 5000); });
+chrome.alarms.create("robot", { periodInMinutes: 5 });
+chrome.alarms.onAlarm.addListener((a) => { if (a.name === "robot") keepWindows(); });
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg && msg.type === "robot") { isRobot().then((r) => reply({ robot: r })); return true; }
+});
