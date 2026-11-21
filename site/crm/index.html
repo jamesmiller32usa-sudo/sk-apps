@@ -2752,8 +2752,89 @@ var IB = (function(){
       if (changed) renderMsgs(true);
     }).catch(function(){ _rxBusy = false; });
   }
+  // ── Auto photo fill ──
+  // Customers with no saved photo or profile link get a "Get photo" request automatically, one at a time,
+  // a short pause between each. The SK Inbox Pictures extension in the open Business Suite tab handles
+  // each request by searching the name (same as pressing "Get photo"). Only one request is in flight across
+  // every open CRM, so Business Suite is never flooded. Customers that failed are retried after 12 hours.
+  var AF = { busy: false, offline: {}, left: 0 };
+  function afHasPhoto(c){ return c.fb_uid && c.profile_pic && String(c.profile_pic).indexOf('/inbox-media/avatars/') >= 0; }
+  function afStatus(){
+    var el = $('ib-af');
+    if (!el) {
+      var host = document.querySelector('#page-inbox'); if (!host) return;
+      el = document.createElement('div'); el.id = 'ib-af';
+      el.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:50;background:#1c1e21;color:#fff;font-size:12px;padding:6px 10px;border-radius:14px;opacity:.85;pointer-events:none';
+      host.appendChild(el);
+    }
+    el.style.display = AF.left ? '' : 'none';
+    el.textContent = 'Fetching missing photos: ' + AF.left + ' left';
+  }
+  function afWait(rid){
+    var t0 = Date.now();
+    return new Promise(function(res){
+      (function poll(){
+        q('ib_avatar_requests?select=status&id=eq.' + rid).then(function(x){
+          var st = x && x[0] && x[0].status;
+          if (st === 'done' || st === 'failed') return res(st);
+          if (st === 'new' && Date.now() - t0 > 12000) return res('offline');
+          if (Date.now() - t0 > 180000) return res('timeout');
+          setTimeout(poll, 2000);
+        }).catch(function(){ if (Date.now() - t0 > 180000) res('timeout'); else setTimeout(poll, 3000); });
+      })();
+    });
+  }
+  function afRun(){
+    if (AF.busy || !currentUser) return;
+    AF.busy = true;
+    var now = Date.now();
+    var recent = new Date(now - 12 * 3600e3).toISOString();
+    var lockSince = new Date(now - 3 * 60e3).toISOString();
+    var freshNew = new Date(now - 15e3).toISOString();
+    Promise.all([
+      // someone (another CRM or a person pressing "Get photo") already has a request running: wait for it
+      q('ib_avatar_requests?select=id&or=(and(status.eq.working,updated_at.gt.' + lockSince + '),and(status.eq.new,created_at.gt.' + freshNew + '))&limit=1'),
+      q('ib_avatar_requests?select=contact_id,note&created_at=gt.' + recent + '&limit=3000'),
+      q('ib_conv_view?select=contact_id,page_id,name,profile_pic,fb_uid&is_deleted=is.false&name=not.is.null&order=last_message_at.desc.nullslast&limit=2000')
+    ]).then(function(r){
+      if (Array.isArray(r[0]) && r[0].length) return;
+      var tried = {}; (r[1] || []).forEach(function(x){ if (x.note !== 'Business Suite not open (auto)') tried[x.contact_id] = 1; });
+      var seen = {}, todo = [];
+      (r[2] || []).forEach(function(c){
+        if (!c.contact_id || seen[c.contact_id]) return; seen[c.contact_id] = 1;
+        if (afHasPhoto(c)) return;
+        todo.push(c);
+      });
+      AF.left = todo.length; afStatus();
+      var next = todo.find(function(c){ return !tried[c.contact_id] && !(AF.offline[c.page_id] > now); });
+      if (!next) return;
+      return supaFetch('ib_avatar_requests', { method: 'POST', body: JSON.stringify({ contact_id: next.contact_id, name: next.name, page_id: next.page_id }) })
+        .then(function(x){ return x.json(); })
+        .then(function(rows){
+          var rid = rows && rows[0] && rows[0].id; if (!rid) return;
+          return afWait(rid).then(function(st){
+            if (st === 'offline') {
+              // no Business Suite tab with the extension is open for this page: skip it for 10 minutes
+              AF.offline[next.page_id] = Date.now() + 10 * 60e3;
+              patch('ib_avatar_requests?id=eq.' + rid, { status: 'failed', note: 'Business Suite not open (auto)', updated_at: new Date().toISOString() }).catch(function(){});
+            }
+            if (st === 'done') {
+              AF.left = Math.max(0, AF.left - 1); afStatus();
+              var c = S.list.find(function(x){ return x.contact_id === next.contact_id; });
+              if (c) load(true);
+            }
+          });
+        });
+    }).catch(function(){}).then(function(){ AF.busy = false; });
+  }
+  function afStart(){
+    if (AF.timer) return;
+    setTimeout(afRun, 15000);
+    AF.timer = setInterval(afRun, 20000 + Math.round(Math.random() * 5000));
+  }
+
   function show(){
-    boot().then(function(){ view(S.v); counts(); });
+    boot().then(function(){ view(S.v); counts(); afStart(); });
     try { if (localStorage.getItem('ib-full')) full(true); } catch (e) {}
     if (!S.timer) S.timer = setInterval(tick, 3000);
   }
