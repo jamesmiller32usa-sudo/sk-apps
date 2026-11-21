@@ -1087,7 +1087,7 @@ function accStats(a) {
   // lines the statement can not have yet (15 Nov 2026): from the EBL mail alerts (also the other side of a mail transfer), or dated after the statement
   const fromMail = l => l.source === 'email' || (String(l.id).startsWith('tf-') && (S.transactions.find(t => t.id === String(l.id).slice(3)) || {}).source === 'email');
   const after = imp ? [...tx, ...virt].filter(l => fromMail(l) || l.date > imp.period_to).reduce((s, l) => s + l.credit - l.debit, 0) : 0;
-  return { books, bank: imp ? imp.closing : null, bankImp: imp || null, unc: tx.filter(t => !isDone(t)).length, after, atStmt: books - after };
+  return { books: Math.round(books), bank: imp ? Math.round(imp.closing) : null, bankImp: imp || null, unc: tx.filter(t => !isDone(t)).length, after: Math.round(after), atStmt: Math.round(books - after) };
 }
 const isShotImp = i => /^Screenshots/.test(i.file_name || '') && !/balance in app/.test(i.file_name || ''); // a picture import counts for Amount in Bank only when he typed the balance the app showed
 function applyRules(row, accId) {
