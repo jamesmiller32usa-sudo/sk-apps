@@ -1086,7 +1086,8 @@ function accStats(a) {
   const imp = S.imports.filter(i => i.account_id === a.id && !isShotImp(i)).sort((x, y) => String(x.period_to).localeCompare(String(y.period_to))).pop();
   // lines the statement can not have yet (15 Nov 2026): from the EBL mail alerts (also the other side of a mail transfer), or dated after the statement
   const fromMail = l => l.source === 'email' || (String(l.id).startsWith('tf-') && (S.transactions.find(t => t.id === String(l.id).slice(3)) || {}).source === 'email');
-  const after = imp ? [...tx, ...virt].filter(l => fromMail(l) || l.date > imp.period_to).reduce((s, l) => s + l.credit - l.debit, 0) : 0;
+  const byHand = imp && (imp.file_name === BAL_FILE || /balance in app/.test(imp.file_name || '')); // a balance he typed already includes the mail-alert lines
+  const after = imp ? [...tx, ...virt].filter(l => (!byHand && fromMail(l)) || l.date > imp.period_to).reduce((s, l) => s + l.credit - l.debit, 0) : 0;
   return { books: Math.round(books), bank: imp ? Math.round(imp.closing) : null, bankImp: imp || null, unc: tx.filter(t => !isDone(t)).length, after: Math.round(after), atStmt: Math.round(books - after) };
 }
 const isShotImp = i => /^Screenshots/.test(i.file_name || '') && !/balance in app/.test(i.file_name || ''); // a picture import counts for Amount in Bank only when he typed the balance the app showed
